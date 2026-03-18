@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    working_dir: /var/www/html
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: weberse
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: weberse
+      MYSQL_PASSWORD: secret
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+
+volumes:
+  mysql-data:

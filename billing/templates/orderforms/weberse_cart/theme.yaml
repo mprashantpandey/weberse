@@ -1,0 +1,6 @@
+# Weberse order form - matches Weberse client theme (dark navy + green)
+name: "Weberse Cart"
+dependencies:
+  bootstrap: 3||4
+  jquery: 1.12
+  fontawesome: 5

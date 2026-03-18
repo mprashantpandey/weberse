@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 620" role="img" aria-label="Industries UI/UX illustration">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b2440"/>
+      <stop offset="1" stop-color="#0f3155"/>
+    </linearGradient>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#73b655"/>
+      <stop offset="1" stop-color="#4f9440"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <rect width="980" height="620" rx="44" fill="url(#bg2)"/>
+  <circle cx="170" cy="160" r="120" fill="#73b655" opacity="0.16"/>
+  <circle cx="835" cy="470" r="160" fill="#73b655" opacity="0.10"/>
+
+  <!-- Tiles -->
+  <g filter="url(#soft)">
+    <rect x="120" y="140" width="340" height="170" rx="26" fill="#0b2a4a" stroke="#214a76" opacity="0.98"/>
+    <rect x="520" y="140" width="340" height="170" rx="26" fill="#0b2a4a" stroke="#214a76" opacity="0.98"/>
+    <rect x="120" y="330" width="340" height="170" rx="26" fill="#0b2a4a" stroke="#214a76" opacity="0.98"/>
+    <rect x="520" y="330" width="340" height="170" rx="26" fill="#0b2a4a" stroke="#214a76" opacity="0.98"/>
+  </g>
+
+  <!-- Icons (simple shapes) -->
+  <!-- Commerce -->
+  <g transform="translate(150,170)">
+    <rect x="0" y="18" width="84" height="64" rx="14" fill="#ffffff" opacity="0.12"/>
+    <path d="M14 38h56l-6 34H20L14 38z" fill="url(#g)" opacity="0.95"/>
+    <circle cx="28" cy="78" r="6" fill="#e2e8f0" opacity="0.8"/>
+    <circle cx="58" cy="78" r="6" fill="#e2e8f0" opacity="0.8"/>
+    <rect x="12" y="16" width="60" height="10" rx="5" fill="#e2e8f0" opacity="0.55"/>
+  </g>
+  <!-- Health -->
+  <g transform="translate(550,170)">
+    <rect x="0" y="18" width="84" height="64" rx="14" fill="#ffffff" opacity="0.12"/>
+    <path d="M42 30c10-12 26 2 18 16-6 10-18 18-18 18S30 56 24 46c-8-14 8-28 18-16z" fill="url(#g)" opacity="0.95"/>
+    <rect x="34" y="44" width="16" height="8" rx="4" fill="#ffffff" opacity="0.85"/>
+    <rect x="38" y="38" width="8" height="20" rx="4" fill="#ffffff" opacity="0.85"/>
+  </g>
+  <!-- Finance -->
+  <g transform="translate(150,360)">
+    <rect x="0" y="18" width="84" height="64" rx="14" fill="#ffffff" opacity="0.12"/>
+    <path d="M20 68V44h10v24H20zm18 0V36h10v32H38zm18 0V52h10v16H56z" fill="url(#g)" opacity="0.95"/>
+    <path d="M18 34h50" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
+  </g>
+  <!-- SaaS -->
+  <g transform="translate(550,360)">
+    <rect x="0" y="18" width="84" height="64" rx="14" fill="#ffffff" opacity="0.12"/>
+    <path d="M24 60c6 8 30 8 36 0" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+    <path d="M30 44c3-6 17-6 20 0" fill="none" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round" opacity="0.55"/>
+    <circle cx="30" cy="36" r="6" fill="#e2e8f0" opacity="0.55"/>
+    <circle cx="54" cy="36" r="6" fill="#e2e8f0" opacity="0.55"/>
+  </g>
+
+  <!-- Labels -->
+  <g font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-weight="700">
+    <text x="240" y="212" font-size="22" fill="#e2e8f0">eCommerce</text>
+    <text x="240" y="244" font-size="16" fill="#cbd5e1" opacity="0.9">Checkout UX " Catalog " CRO</text>
+
+    <text x="610" y="212" font-size="22" fill="#e2e8f0">Healthcare</text>
+    <text x="610" y="244" font-size="16" fill="#cbd5e1" opacity="0.9">Trust " Accessibility " Clarity</text>
+
+    <text x="240" y="402" font-size="22" fill="#e2e8f0">Fintech</text>
+    <text x="240" y="434" font-size="16" fill="#cbd5e1" opacity="0.9">Dashboards " KYC " Security UX</text>
+
+    <text x="610" y="402" font-size="22" fill="#e2e8f0">SaaS & Platforms</text>
+    <text x="610" y="434" font-size="16" fill="#cbd5e1" opacity="0.9">Onboarding " Retention " Admin UI</text>
+  </g>
+
+  <!-- Accent path -->
+  <path d="M170 522 C 280 564, 420 486, 520 522 C 650 570, 760 512, 820 540" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round" opacity="0.85"/>
+</svg>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" role="img" aria-label="Marketing analytics illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef4fa"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#73b655"/>
+      <stop offset="1" stop-color="#4f9440"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0d2f50" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="900" height="620" rx="44" fill="url(#bg)"/>
+
+  <!-- Decorative blobs -->
+  <circle cx="128" cy="110" r="84" fill="#73b655" opacity="0.10"/>
+  <circle cx="780" cy="140" r="110" fill="#0d2f50" opacity="0.08"/>
+  <circle cx="720" cy="520" r="140" fill="#73b655" opacity="0.06"/>
+
+  <!-- Main dashboard card -->
+  <g filter="url(#shadow)">
+    <rect x="110" y="120" width="680" height="400" rx="28" fill="#ffffff"/>
+    <rect x="110" y="120" width="680" height="56" rx="28" fill="#ffffff"/>
+    <rect x="110" y="164" width="680" height="12" fill="#f1f5f9"/>
+  </g>
+
+  <!-- Top chips -->
+  <g opacity="0.95">
+    <rect x="148" y="140" width="128" height="26" rx="13" fill="#f1f5f9" stroke="#e2e8f0"/>
+    <rect x="286" y="140" width="118" height="26" rx="13" fill="#f1f5f9" stroke="#e2e8f0"/>
+    <rect x="414" y="140" width="150" height="26" rx="13" fill="#ecfdf5" stroke="#cdebd0"/>
+    <rect x="148" y="148" width="52" height="10" rx="5" fill="#0d2f50" opacity="0.25"/>
+    <rect x="286" y="148" width="44" height="10" rx="5" fill="#0d2f50" opacity="0.25"/>
+    <rect x="414" y="148" width="72" height="10" rx="5" fill="#73b655" opacity="0.55"/>
+  </g>
+
+  <!-- Left column: KPI cards -->
+  <g>
+    <rect x="150" y="210" width="220" height="92" rx="18" fill="#f8fafc" stroke="#e2e8f0"/>
+    <rect x="150" y="316" width="220" height="92" rx="18" fill="#f8fafc" stroke="#e2e8f0"/>
+    <rect x="150" y="422" width="220" height="72" rx="18" fill="#f8fafc" stroke="#e2e8f0"/>
+
+    <circle cx="184" cy="246" r="14" fill="#0d2f50" opacity="0.16"/>
+    <circle cx="184" cy="352" r="14" fill="#73b655" opacity="0.20"/>
+    <circle cx="184" cy="458" r="14" fill="#0d2f50" opacity="0.12"/>
+
+    <rect x="208" y="236" width="110" height="10" rx="5" fill="#0d2f50" opacity="0.22"/>
+    <rect x="208" y="256" width="72" height="10" rx="5" fill="#0d2f50" opacity="0.14"/>
+    <rect x="208" y="276" width="140" height="12" rx="6" fill="url(#accent)" opacity="0.9"/>
+
+    <rect x="208" y="342" width="118" height="10" rx="5" fill="#0d2f50" opacity="0.22"/>
+    <rect x="208" y="362" width="90" height="10" rx="5" fill="#0d2f50" opacity="0.14"/>
+    <rect x="208" y="382" width="132" height="12" rx="6" fill="#73b655" opacity="0.75"/>
+
+    <rect x="208" y="448" width="96" height="10" rx="5" fill="#0d2f50" opacity="0.22"/>
+    <rect x="208" y="468" width="138" height="10" rx="5" fill="#0d2f50" opacity="0.14"/>
+  </g>
+
+  <!-- Right column: chart area -->
+  <g>
+    <rect x="394" y="210" width="376" height="284" rx="18" fill="#f8fafc" stroke="#e2e8f0"/>
+
+    <!-- grid -->
+    <g opacity="0.35" stroke="#cbd5e1" stroke-width="1">
+      <line x1="420" y1="260" x2="742" y2="260"/>
+      <line x1="420" y1="310" x2="742" y2="310"/>
+      <line x1="420" y1="360" x2="742" y2="360"/>
+      <line x1="420" y1="410" x2="742" y2="410"/>
+    </g>
+
+    <!-- bars -->
+    <g>
+      <rect x="430" y="360" width="26" height="92" rx="8" fill="#0d2f50" opacity="0.20"/>
+      <rect x="468" y="332" width="26" height="120" rx="8" fill="#0d2f50" opacity="0.20"/>
+      <rect x="506" y="300" width="26" height="152" rx="8" fill="#0d2f50" opacity="0.20"/>
+      <rect x="544" y="322" width="26" height="130" rx="8" fill="#0d2f50" opacity="0.20"/>
+      <rect x="582" y="276" width="26" height="176" rx="8" fill="#73b655" opacity="0.75"/>
+      <rect x="620" y="292" width="26" height="160" rx="8" fill="#0d2f50" opacity="0.20"/>
+      <rect x="658" y="340" width="26" height="112" rx="8" fill="#0d2f50" opacity="0.20"/>
+      <rect x="696" y="312" width="26" height="140" rx="8" fill="#0d2f50" opacity="0.20"/>
+    </g>
+
+    <!-- line -->
+    <path d="M430 338 C 480 320, 520 308, 570 292 C 610 280, 650 300, 722 268" fill="none" stroke="url(#accent)" stroke-width="4" stroke-linecap="round"/>
+    <g fill="#73b655">
+      <circle cx="430" cy="338" r="5"/>
+      <circle cx="570" cy="292" r="5"/>
+      <circle cx="722" cy="268" r="5"/>
+    </g>
+  </g>
+
+  <!-- Bottom pills -->
+  <g>
+    <rect x="394" y="506" width="186" height="40" rx="20" fill="#ecfdf5" stroke="#cdebd0"/>
+    <rect x="592" y="506" width="178" height="40" rx="20" fill="#f1f5f9" stroke="#e2e8f0"/>
+    <circle cx="424" cy="526" r="10" fill="#73b655" opacity="0.9"/>
+    <circle cx="622" cy="526" r="10" fill="#0d2f50" opacity="0.18"/>
+    <rect x="442" y="520" width="96" height="12" rx="6" fill="#0d2f50" opacity="0.20"/>
+    <rect x="640" y="520" width="88" height="12" rx="6" fill="#0d2f50" opacity="0.18"/>
+  </g>
+</svg>

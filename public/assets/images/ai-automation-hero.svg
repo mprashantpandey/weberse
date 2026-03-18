@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 620" role="img" aria-label="AI automation illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef4fa"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#73b655"/>
+      <stop offset="1" stop-color="#4f9440"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0d2f50" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="980" height="620" rx="44" fill="url(#bg)"/>
+
+  <circle cx="150" cy="140" r="98" fill="#73b655" opacity="0.10"/>
+  <circle cx="860" cy="150" r="128" fill="#0d2f50" opacity="0.08"/>
+  <circle cx="820" cy="520" r="150" fill="#73b655" opacity="0.08"/>
+
+  <!-- Main card -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="110" width="740" height="450" rx="28" fill="#ffffff"/>
+    <rect x="120" y="110" width="740" height="58" rx="28" fill="#ffffff"/>
+    <circle cx="154" cy="139" r="7" fill="#ef4444" opacity="0.50"/>
+    <circle cx="176" cy="139" r="7" fill="#f59e0b" opacity="0.50"/>
+    <circle cx="198" cy="139" r="7" fill="#10b981" opacity="0.50"/>
+    <rect x="230" y="130" width="420" height="18" rx="9" fill="#f1f5f9" stroke="#e2e8f0"/>
+  </g>
+
+  <!-- Left panel: triggers -->
+  <rect x="150" y="190" width="220" height="340" rx="22" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="170" y="214" width="110" height="12" rx="6" fill="#0d2f50" opacity="0.18"/>
+  <rect x="170" y="244" width="170" height="10" rx="5" fill="#0d2f50" opacity="0.10"/>
+  <rect x="170" y="266" width="152" height="10" rx="5" fill="#0d2f50" opacity="0.10"/>
+
+  <!-- Trigger pills -->
+  <g>
+    <rect x="170" y="308" width="180" height="46" rx="16" fill="#ffffff" stroke="#e2e8f0"/>
+    <circle cx="192" cy="331" r="10" fill="#0d2f50" opacity="0.16"/>
+    <rect x="210" y="324" width="96" height="12" rx="6" fill="#0d2f50" opacity="0.14"/>
+
+    <rect x="170" y="366" width="180" height="46" rx="16" fill="#ffffff" stroke="#e2e8f0"/>
+    <circle cx="192" cy="389" r="10" fill="#73b655" opacity="0.25"/>
+    <rect x="210" y="382" width="120" height="12" rx="6" fill="#0d2f50" opacity="0.12"/>
+
+    <rect x="170" y="424" width="180" height="46" rx="16" fill="#ffffff" stroke="#e2e8f0"/>
+    <circle cx="192" cy="447" r="10" fill="#0d2f50" opacity="0.12"/>
+    <rect x="210" y="440" width="84" height="12" rx="6" fill="#0d2f50" opacity="0.12"/>
+  </g>
+
+  <!-- Right canvas: workflow -->
+  <rect x="390" y="190" width="440" height="208" rx="22" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="412" y="214" width="190" height="14" rx="7" fill="#0d2f50" opacity="0.16"/>
+  <rect x="412" y="244" width="270" height="10" rx="5" fill="#0d2f50" opacity="0.10"/>
+
+  <!-- Nodes -->
+  <g>
+    <rect x="412" y="284" width="150" height="84" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+    <rect x="580" y="284" width="220" height="40" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+    <rect x="580" y="328" width="220" height="40" rx="18" fill="#ffffff" stroke="#e2e8f0"/>
+
+    <circle cx="438" cy="312" r="12" fill="url(#accent)" opacity="0.95"/>
+    <rect x="458" y="304" width="78" height="12" rx="6" fill="#0d2f50" opacity="0.14"/>
+    <rect x="458" y="326" width="98" height="10" rx="5" fill="#0d2f50" opacity="0.10"/>
+
+    <circle cx="604" cy="304" r="10" fill="#0d2f50" opacity="0.14"/>
+    <rect x="624" y="298" width="132" height="12" rx="6" fill="#0d2f50" opacity="0.12"/>
+    <circle cx="604" cy="348" r="10" fill="#73b655" opacity="0.35"/>
+    <rect x="624" y="342" width="156" height="12" rx="6" fill="#0d2f50" opacity="0.10"/>
+  </g>
+
+  <!-- Connecting lines -->
+  <path d="M560 326 C 572 326, 572 304, 580 304" fill="none" stroke="#73b655" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+  <path d="M560 338 C 572 338, 572 348, 580 348" fill="none" stroke="#73b655" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Bottom: results -->
+  <rect x="390" y="420" width="440" height="110" rx="22" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="412" y="446" width="160" height="12" rx="6" fill="#0d2f50" opacity="0.16"/>
+  <rect x="412" y="472" width="280" height="10" rx="5" fill="#0d2f50" opacity="0.10"/>
+  <rect x="412" y="492" width="240" height="10" rx="5" fill="#0d2f50" opacity="0.10"/>
+
+  <!-- Accent pulse -->
+  <path d="M420 408 C 510 378, 590 438, 690 398 C 770 366, 800 404, 820 388" fill="none" stroke="url(#accent)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+</svg>

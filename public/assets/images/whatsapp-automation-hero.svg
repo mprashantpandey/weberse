@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 620" role="img" aria-label="WhatsApp Cloud automation illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef4fa"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#73b655"/>
+      <stop offset="1" stop-color="#4f9440"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0d2f50" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="980" height="620" rx="44" fill="url(#bg)"/>
+  <circle cx="170" cy="140" r="104" fill="#73b655" opacity="0.10"/>
+  <circle cx="850" cy="160" r="128" fill="#0d2f50" opacity="0.08"/>
+
+  <!-- Phone -->
+  <g filter="url(#shadow)">
+    <rect x="160" y="110" width="320" height="460" rx="44" fill="#0d2f50" opacity="0.95"/>
+    <rect x="186" y="150" width="268" height="380" rx="32" fill="#071a2f"/>
+    <rect x="250" y="126" width="140" height="10" rx="5" fill="#ffffff" opacity="0.22"/>
+    <circle cx="320" cy="548" r="14" fill="#ffffff" opacity="0.16"/>
+  </g>
+
+  <!-- Chat bubbles -->
+  <g>
+    <rect x="210" y="190" width="210" height="54" rx="18" fill="#ffffff" opacity="0.12" stroke="#214a76"/>
+    <rect x="230" y="208" width="140" height="10" rx="5" fill="#e2e8f0" opacity="0.55"/>
+    <rect x="230" y="226" width="110" height="10" rx="5" fill="#e2e8f0" opacity="0.45"/>
+
+    <rect x="250" y="264" width="190" height="54" rx="18" fill="#0b223d" opacity="0.95" stroke="#214a76"/>
+    <rect x="270" y="282" width="132" height="10" rx="5" fill="#e2e8f0" opacity="0.55"/>
+    <rect x="270" y="300" width="92" height="10" rx="5" fill="#e2e8f0" opacity="0.40"/>
+
+    <rect x="210" y="338" width="230" height="64" rx="18" fill="#ffffff" opacity="0.12" stroke="#214a76"/>
+    <rect x="230" y="358" width="170" height="10" rx="5" fill="#e2e8f0" opacity="0.55"/>
+    <rect x="230" y="376" width="120" height="10" rx="5" fill="#e2e8f0" opacity="0.40"/>
+  </g>
+
+  <!-- Workflow board -->
+  <g filter="url(#shadow)">
+    <rect x="520" y="130" width="330" height="440" rx="28" fill="#ffffff"/>
+    <rect x="520" y="130" width="330" height="58" rx="28" fill="#ffffff"/>
+    <rect x="560" y="150" width="180" height="18" rx="9" fill="#f1f5f9" stroke="#e2e8f0"/>
+    <circle cx="828" cy="158" r="10" fill="url(#accent)" opacity="0.9"/>
+  </g>
+
+  <!-- Nodes -->
+  <g>
+    <rect x="550" y="220" width="270" height="62" rx="22" fill="#f8fafc" stroke="#e2e8f0"/>
+    <circle cx="580" cy="251" r="12" fill="url(#accent)"/>
+    <rect x="605" y="244" width="150" height="12" rx="6" fill="#0d2f50" opacity="0.14"/>
+
+    <rect x="550" y="310" width="270" height="62" rx="22" fill="#f8fafc" stroke="#e2e8f0"/>
+    <circle cx="580" cy="341" r="12" fill="#0d2f50" opacity="0.14"/>
+    <rect x="605" y="334" width="176" height="12" rx="6" fill="#0d2f50" opacity="0.12"/>
+
+    <rect x="550" y="400" width="270" height="62" rx="22" fill="#f8fafc" stroke="#e2e8f0"/>
+    <circle cx="580" cy="431" r="12" fill="#73b655" opacity="0.35"/>
+    <rect x="605" y="424" width="132" height="12" rx="6" fill="#0d2f50" opacity="0.10"/>
+  </g>
+
+  <!-- Connectors -->
+  <path d="M685 284 V 310" stroke="#73b655" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+  <path d="M685 372 V 400" stroke="#73b655" stroke-width="5" stroke-linecap="round" opacity="0.65"/>
+
+  <!-- Accent sweep -->
+  <path d="M520 520 C 610 470, 690 560, 780 510 C 830 482, 860 510, 880 492" fill="none" stroke="url(#accent)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+</svg>
