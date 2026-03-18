@@ -1,4 +1,8 @@
-@extends('layouts.website', ['title' => $caseStudy->title.' | Case Study'])
+@extends('layouts.website', [
+    'title' => $caseStudy->title.' | Case Study',
+    'description' => $caseStudy->summary,
+    'seoImage' => $caseStudy->featured_image ? $mediaAssetUrl($caseStudy->featured_image) : $mediaAssetUrl($websiteImages['case_studies']['hero_story'] ?? null, 'assets/images/map-placeholder.svg'),
+])
 
 @section('content')
     <section class="dark-band">

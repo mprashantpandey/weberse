@@ -3,14 +3,153 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? 'Weberse Infotech Private Limited' }}</title>
+    @php
+        $seoTitle = $title ?? ($companyProfile['name'] ?? config('platform.company.name'));
+        $seoDescription = $description ?? 'Weberse Infotech builds premium websites, software systems, automation workflows, and digital products.';
+        $seoRobots = $robots ?? 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
+        $canonicalUrl = $canonical ?? url()->current();
+        $seoType = $seoType ?? 'website';
+        $defaultSeoImage = $mediaAssetUrl($companyProfile['dark_logo'] ?? null, 'assets/images/og-cover.svg');
+        $seoImage = $seoImage ?? $defaultSeoImage;
+        $seoImageWidth = $seoImageWidth ?? 1200;
+        $seoImageHeight = $seoImageHeight ?? 630;
+        $seoImageType = $seoImageType ?? match (strtolower(pathinfo(parse_url($seoImage, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION))) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+            default => 'image/svg+xml',
+        };
+        $seoPublishedTime = $publishedTime ?? null;
+        $seoModifiedTime = $modifiedTime ?? null;
+        $socials = $companyProfile['socials'] ?? config('platform.company.socials', []);
+
+        $organizationSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => $companyProfile['name'] ?? config('platform.company.name'),
+            'url' => rtrim(config('app.url'), '/'),
+            'logo' => $mediaAssetUrl($companyProfile['dark_logo'] ?? null, 'assets/legacy/weberse-dark.svg'),
+            'description' => $seoDescription,
+            'email' => $companyProfile['email'] ?? config('platform.company.email'),
+            'telephone' => $companyProfile['phone'] ?? config('platform.company.phone'),
+            'address' => [
+                '@type' => 'PostalAddress',
+                'addressLocality' => $companyProfile['location'] ?? config('platform.company.location'),
+                'streetAddress' => trim(($companyProfile['address_line_1'] ?? '').' '.($companyProfile['address_line_2'] ?? '')),
+                'addressCountry' => 'IN',
+            ],
+            'sameAs' => array_values(array_filter($socials)),
+        ];
+
+        $websiteSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => $companyProfile['name'] ?? config('platform.company.name'),
+            'url' => rtrim(config('app.url'), '/'),
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => route('website.blog.index').'?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ];
+
+        $pageSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebPage',
+            'name' => $seoTitle,
+            'description' => $seoDescription,
+            'url' => $canonicalUrl,
+        ];
+
+        if (request()->routeIs('website.blog.show') && isset($post)) {
+            $pageSchema = [
+                '@context' => 'https://schema.org',
+                '@type' => 'Article',
+                'headline' => $post->title,
+                'description' => $post->seo_description ?: $post->excerpt,
+                'image' => [$post->cover_image ? $mediaAssetUrl($post->cover_image) : $defaultSeoImage],
+                'datePublished' => optional($post->published_at)->toAtomString(),
+                'dateModified' => optional($post->updated_at)->toAtomString(),
+                'author' => [
+                    '@type' => 'Person',
+                    'name' => $post->author?->name ?: ($companyProfile['name'] ?? config('platform.company.name')),
+                ],
+                'publisher' => [
+                    '@type' => 'Organization',
+                    'name' => $companyProfile['name'] ?? config('platform.company.name'),
+                    'logo' => [
+                        '@type' => 'ImageObject',
+                        'url' => $mediaAssetUrl($companyProfile['dark_logo'] ?? null, 'assets/legacy/weberse-dark.svg'),
+                    ],
+                ],
+                'mainEntityOfPage' => $canonicalUrl,
+            ];
+        } elseif (request()->routeIs('website.portfolio.show') && isset($project)) {
+            $pageSchema = [
+                '@context' => 'https://schema.org',
+                '@type' => 'CreativeWork',
+                'name' => $project->title,
+                'description' => $project->summary,
+                'image' => $project->featured_image ? $mediaAssetUrl($project->featured_image) : $defaultSeoImage,
+                'creator' => $companyProfile['name'] ?? config('platform.company.name'),
+                'url' => $canonicalUrl,
+            ];
+        } elseif (request()->routeIs('website.case-studies.show') && isset($caseStudy)) {
+            $pageSchema = [
+                '@context' => 'https://schema.org',
+                '@type' => 'CreativeWork',
+                'name' => $caseStudy->title,
+                'description' => $caseStudy->summary,
+                'image' => $caseStudy->featured_image ? $mediaAssetUrl($caseStudy->featured_image) : $defaultSeoImage,
+                'about' => $caseStudy->client,
+                'creator' => $companyProfile['name'] ?? config('platform.company.name'),
+                'url' => $canonicalUrl,
+            ];
+        } elseif (request()->routeIs('website.services.show') && isset($service)) {
+            $pageSchema = [
+                '@context' => 'https://schema.org',
+                '@type' => 'Service',
+                'name' => $service['title'] ?? 'Weberse Service',
+                'description' => $service['summary'] ?? $seoDescription,
+                'provider' => [
+                    '@type' => 'Organization',
+                    'name' => $companyProfile['name'] ?? config('platform.company.name'),
+                ],
+                'url' => $canonicalUrl,
+            ];
+        }
+    @endphp
+    <title>{{ $seoTitle }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="{{ $description ?? 'Weberse Infotech builds premium websites, software systems, automation workflows, and digital products.' }}">
-    <meta property="og:title" content="{{ $title ?? 'Weberse Infotech Private Limited' }}">
-    <meta property="og:description" content="{{ $description ?? 'Innovating Intelligence. Building the Future.' }}">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="{{ asset('assets/images/og-cover.svg') }}">
-    <link rel="icon" href="{{ asset('assets/legacy/favicon.png') }}">
+    <meta name="description" content="{{ $seoDescription }}">
+    <meta name="robots" content="{{ $seoRobots }}">
+    <meta name="author" content="{{ $companyProfile['name'] ?? config('platform.company.name') }}">
+    <meta name="theme-color" content="{{ config('platform.company.primary_blue') }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:type" content="{{ $seoType }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:site_name" content="{{ $companyProfile['name'] ?? config('platform.company.name') }}">
+    <meta property="og:locale" content="en_IN">
+    <meta property="og:image" content="{{ $seoImage }}">
+    <meta property="og:image:width" content="{{ $seoImageWidth }}">
+    <meta property="og:image:height" content="{{ $seoImageHeight }}">
+    <meta property="og:image:type" content="{{ $seoImageType }}">
+    <meta property="og:image:alt" content="{{ $seoTitle }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
+    <meta name="twitter:image:alt" content="{{ $seoTitle }}">
+    @if($seoPublishedTime)
+        <meta property="article:published_time" content="{{ $seoPublishedTime }}">
+    @endif
+    @if($seoModifiedTime)
+        <meta property="article:modified_time" content="{{ $seoModifiedTime }}">
+    @endif
+    <link rel="icon" href="{{ $mediaAssetUrl($companyProfile['favicon'] ?? null, 'favicon.ico') }}">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ route('seo.sitemap') }}">
     @php($integrationSettings = app(\App\Services\Settings\SiteSettingsService::class)->getIntegrationSettings())
     @if (!empty($integrationSettings['google_analytics_id']))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $integrationSettings['google_analytics_id'] }}"></script>
@@ -33,6 +172,9 @@
     @if (!empty($integrationSettings['head_snippet']))
         {!! $integrationSettings['head_snippet'] !!}
     @endif
+    <script type="application/ld+json">{!! json_encode($organizationSchema, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! json_encode($websiteSchema, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! json_encode($pageSchema, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="site-shell">

@@ -1,4 +1,7 @@
-@extends('layouts.website', ['title' => 'Case Studies | Weberse Infotech'])
+@extends('layouts.website', [
+    'title' => 'Case Studies | Weberse Infotech',
+    'description' => 'Read Weberse case studies showing how better digital clarity improves trust, conversions, and operational workflows.',
+])
 
 @section('content')
     <section class="dark-band">

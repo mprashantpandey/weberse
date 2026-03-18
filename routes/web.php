@@ -9,10 +9,14 @@ use App\Http\Controllers\Store\DownloadController as StoreDownloadController;
 use App\Http\Controllers\Store\StorefrontController;
 use App\Http\Controllers\Webhooks\RazorpayWebhookController;
 use App\Http\Controllers\Website\FormController;
+use App\Http\Controllers\Website\SeoController;
 use App\Http\Controllers\Website\WebsiteController;
 use App\Services\Settings\SiteSettingsService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 
 Route::get('/', [WebsiteController::class, 'home'])->name('website.home');
 Route::get('/about', [WebsiteController::class, 'about'])->name('website.about');

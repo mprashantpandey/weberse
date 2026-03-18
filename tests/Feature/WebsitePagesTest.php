@@ -31,4 +31,18 @@ class WebsitePagesTest extends TestCase
         $this->get('/hosting')->assertOk();
         $this->get('/contact')->assertOk();
     }
+
+    public function test_seo_endpoints_are_available(): void
+    {
+        $this->get('/robots.txt')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->assertSee('Sitemap:', false);
+
+        $this->get('/sitemap.xml')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
+            ->assertSee('<?xml version="1.0" encoding="UTF-8"?>', false)
+            ->assertSee('<urlset', false);
+    }
 }

@@ -1,4 +1,8 @@
-@extends('layouts.website', ['title' => 'Apply for '.$job->title.' | Weberse Infotech'])
+@extends('layouts.website', [
+    'title' => 'Apply for '.$job->title.' | Weberse Infotech',
+    'description' => 'Submit your application for '.$job->title.' at Weberse Infotech.',
+    'robots' => 'noindex,follow',
+])
 
 @section('content')
     <section class="dark-band">

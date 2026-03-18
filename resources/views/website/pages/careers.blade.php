@@ -1,4 +1,7 @@
-@extends('layouts.website', ['title' => 'Careers | Weberse Infotech'])
+@extends('layouts.website', [
+    'title' => 'Careers | Weberse Infotech',
+    'description' => 'Explore open roles at Weberse Infotech across design, engineering, support, and operations.',
+])
 
 @section('content')
     <section class="dark-band">

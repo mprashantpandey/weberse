@@ -1,4 +1,7 @@
-@extends('layouts.website', ['title' => $service['title'].' | Weberse Infotech'])
+@extends('layouts.website', [
+    'title' => $service['title'].' | Weberse Infotech',
+    'description' => $service['summary'] ?? ($service['title'].' services from Weberse Infotech.'),
+])
 
 @section('content')
     @if(($service['slug'] ?? '') === 'mobile-app-development')

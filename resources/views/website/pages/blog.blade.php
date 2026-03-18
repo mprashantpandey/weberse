@@ -1,4 +1,7 @@
-@extends('layouts.website', ['title' => 'Blog | Weberse Infotech'])
+@extends('layouts.website', [
+    'title' => 'Blog | Weberse Infotech',
+    'description' => 'Insights from Weberse on websites, client portals, growth systems, automation, UX, and practical digital execution.',
+])
 
 @section('content')
     <section class="dark-band relative overflow-hidden">

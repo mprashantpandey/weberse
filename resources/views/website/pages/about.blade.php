@@ -1,4 +1,8 @@
-@extends('layouts.website', ['title' => 'About Weberse Infotech'])
+@extends('layouts.website', [
+    'title' => 'About Weberse Infotech',
+    'description' => 'Learn how Weberse combines business-aware strategy, premium interface design, and maintainable engineering for growing brands.',
+    'seoImage' => $mediaAssetUrl($websiteImages['about']['hero_team'] ?? null, 'assets/legacy/team.jpg'),
+])
 
 @section('content')
     <section class="dark-band relative overflow-hidden">

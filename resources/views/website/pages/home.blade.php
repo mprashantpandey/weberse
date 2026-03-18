@@ -10,7 +10,23 @@
             <div data-reveal>
                 <div class="section-kicker">Let&apos;s Build</div>
                 <h1 class="mt-5 max-w-3xl text-4xl font-bold leading-[1.08] md:text-5xl xl:text-[3.85rem]">Premium websites and platforms that convert.</h1>
-                <p class="mt-5 max-w-lg text-base leading-8 text-slate-300 md:text-lg">Weberse designs and builds modern digital systems for ambitious brands.</p>
+                <p class="mt-5 max-w-lg text-base leading-8 text-slate-300 md:text-lg">
+                    Weberse designs and builds modern digital systems and marketing funnels for ambitious brands.
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="badge-chip inline-flex items-center gap-2">
+                        @include('website.partials.icon', ['name' => 'layers', 'class' => 'h-4 w-4'])
+                        Digital Marketing
+                    </span>
+                    <span class="badge-chip inline-flex items-center gap-2">
+                        @include('website.partials.icon', ['name' => 'globe', 'class' => 'h-4 w-4'])
+                        Web Development
+                    </span>
+                    <span class="badge-chip inline-flex items-center gap-2">
+                        @include('website.partials.icon', ['name' => 'sparkles', 'class' => 'h-4 w-4'])
+                        Automation & AI
+                    </span>
+                </div>
                 <div class="mt-7 flex flex-wrap gap-4">
                     <a href="{{ route('website.contact') }}"
                        class="btn-primary"
@@ -57,7 +73,7 @@
         <div class="section-shell section-spacious">
         <div class="mb-8 max-w-3xl" data-reveal>
             <div class="section-kicker">Services Overview</div>
-            <h2 class="mt-4 headline-lg text-brand-blue">Scalable systems, AI integration, cloud architecture, and product-grade interfaces.</h2>
+            <h2 class="mt-4 headline-lg text-brand-blue">Web builds, funnel strategy, and marketing systems that grow.</h2>
         </div>
         <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             @foreach ($serviceDetails as $service)
@@ -72,7 +88,9 @@
         <div class="mb-6 max-w-3xl" data-reveal>
             <div class="section-kicker">Advanced Tech Stack</div>
             <h2 class="mt-4 headline-lg">Production-ready technology choices for fast shipping, stable systems, and cloud-native scale.</h2>
-            <p class="mt-4 max-w-2xl body-lg">We structure stacks for delivery velocity without compromising runtime discipline, observability, or future maintainability.</p>
+            <p class="mt-4 max-w-2xl body-lg">
+                We build for delivery speed and include growth instrumentation: landing pages, tracking, analytics dashboards, and clean conversion reporting.
+            </p>
         </div>
         <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
             @foreach ($techStack as $group)
@@ -185,7 +203,16 @@
                         @endif
                         <div class="text-sm font-semibold uppercase tracking-[0.25em] text-brand-green">0{{ $index + 1 }}</div>
                         <h3 class="mt-4 text-2xl font-bold text-white">{{ $step }}</h3>
-                        <p class="mt-3 text-slate-300">{{ ['Clarify goals, audience, and offer positioning.', 'Shape structure, visuals, and conversion flow.', 'Implement responsive interfaces and operational logic.', 'Refine performance, content, and launch quality.'][$index] }}</p>
+                        <p class="mt-3 text-slate-300">
+                            {{
+                                [
+                                    'Clarify goals, audience, and offer positioning.',
+                                    'Shape structure, visuals, and conversion flow.',
+                                    'Implement responsive interfaces and the tracking hooks that keep campaigns measurable.',
+                                    'Refine performance, content, and conversion insights for launch and iteration.'
+                                ][$index]
+                            }}
+                        </p>
                     </div>
                 @endforeach
             </div>

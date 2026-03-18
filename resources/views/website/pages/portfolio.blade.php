@@ -1,4 +1,8 @@
-@extends('layouts.website', ['title' => 'Portfolio | Weberse Infotech'])
+@extends('layouts.website', [
+    'title' => 'Portfolio | Weberse Infotech',
+    'description' => 'See recent Weberse portfolio projects across websites, internal systems, hosting journeys, client portals, and branded product experiences.',
+    'seoImage' => $mediaAssetUrl($websiteImages['portfolio']['hero_showcase'] ?? null, 'assets/images/project-dashboard.svg'),
+])
 
 @section('content')
     <section class="dark-band relative overflow-hidden">

@@ -28,6 +28,16 @@ class WebsiteController extends Controller
             return (object) $testimonial;
         });
 
+        $serviceDetails = collect($marketing['services'] ?? [])->values();
+        $digitalMarketingService = $serviceDetails->firstWhere('slug', 'digital-marketing');
+
+        // Ensure Digital Marketing is visible even if the expanded section doesn't render.
+        if ($digitalMarketingService !== null) {
+            $serviceDetails = $serviceDetails->reject(function (array $service) {
+                return ($service['slug'] ?? null) === 'digital-marketing';
+            })->values()->prepend($digitalMarketingService);
+        }
+
         return view('website.pages.home', [
             'websiteFeatures' => $features,
             'services' => Service::query()->where('is_published', true)->orderBy('sort_order')->take(6)->get(),
@@ -43,7 +53,8 @@ class WebsiteController extends Controller
             'featuredProjects' => $features['portfolio_enabled']
                 ? PortfolioProject::query()->where('is_published', true)->latest()->take(3)->get()
                 : collect(),
-            'serviceDetails' => collect($marketing['services'] ?? []),
+            'digitalMarketingService' => $digitalMarketingService,
+            'serviceDetails' => $serviceDetails,
             'industries' => $marketing['industries'] ?? [],
             'technologies' => $marketing['technologies'] ?? [],
             'techStack' => collect($marketing['tech_stack'] ?? []),
