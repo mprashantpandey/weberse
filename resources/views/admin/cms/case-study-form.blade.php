@@ -17,13 +17,14 @@
         <a href="{{ route('admin.cms.index') }}" class="dashboard-subnav-link">Overview</a>
         <a href="{{ route('admin.cms.website-details') }}" class="dashboard-subnav-link">Website Details</a>
         <a href="{{ route('admin.cms.images') }}" class="dashboard-subnav-link">Images</a>
+        <a href="{{ route('admin.cms.media.index') }}" class="dashboard-subnav-link">Media Library</a>
         <a href="{{ route('admin.cms.posts.index') }}" class="dashboard-subnav-link">Blog Posts</a>
         <a href="{{ route('admin.cms.projects.index') }}" class="dashboard-subnav-link">Portfolio</a>
         <a href="{{ route('admin.cms.case-studies.index') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Case Studies</a>
         <a href="{{ route('admin.cms.testimonials.index') }}" class="dashboard-subnav-link">Testimonials</a>
     </div>
 
-    <div class="grid gap-6 xl:grid-cols-[1fr_0.82fr]" x-data="window.singleMediaPicker(@js(old('featured_image', $caseStudy->featured_image)))">
+    <div class="grid gap-6 xl:grid-cols-[1fr_0.82fr]" x-data="singleMediaPicker(@js(old('featured_image', $caseStudy->featured_image)))">
         <div class="card">
             <div class="panel-title">{{ $mode === 'create' ? 'New Case Study' : 'Manage Case Study' }}</div>
             <form method="POST" action="{{ $mode === 'create' ? route('admin.cms.case-studies.store') : route('admin.cms.case-studies.update', $caseStudy) }}" class="mt-6 grid gap-4">

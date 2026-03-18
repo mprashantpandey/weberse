@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\CMS\BlogPost;
 use App\Models\CMS\CaseStudy;
+use App\Models\CMS\MediaAsset;
 use App\Models\CMS\PortfolioProject;
 use App\Models\CMS\Testimonial;
+use App\Services\CMS\MediaLibraryService;
 use App\Services\Settings\SiteSettingsService;
-use Illuminate\Support\Facades\File;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -23,6 +24,7 @@ class CmsController extends Controller
             'summary' => [
                 'website_details' => 1,
                 'website_images' => 1,
+                'media_assets' => MediaAsset::query()->count(),
                 'posts' => BlogPost::query()->count(),
                 'projects' => PortfolioProject::query()->count(),
                 'case_studies' => CaseStudy::query()->count(),
@@ -34,11 +36,11 @@ class CmsController extends Controller
         ]);
     }
 
-    public function websiteDetails(SiteSettingsService $settings): View
+    public function websiteDetails(SiteSettingsService $settings, MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.website-details', [
             'profile' => $settings->getCompanyProfile(),
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
@@ -49,29 +51,39 @@ class CmsController extends Controller
         ]);
     }
 
-    public function images(SiteSettingsService $settings): View
+    public function images(SiteSettingsService $settings, MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.images', [
             'websiteImages' => $settings->getWebsiteImages(),
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
-    public function createPost(): View
+    public function mediaLibrary(Request $request, MediaLibraryService $mediaLibrary): View
+    {
+        return view('admin.cms.media-library', [
+            'assets' => $mediaLibrary->all($request->string('folder')->toString() ?: null, $request->string('search')->toString() ?: null),
+            'folders' => $mediaLibrary->folderOptions(),
+            'activeFolder' => $request->string('folder')->toString(),
+            'search' => $request->string('search')->toString(),
+        ]);
+    }
+
+    public function createPost(MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.post-form', [
             'post' => new BlogPost(['is_published' => true]),
             'mode' => 'create',
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
-    public function editPost(BlogPost $post): View
+    public function editPost(BlogPost $post, MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.post-form', [
             'post' => $post->load('author'),
             'mode' => 'edit',
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
@@ -82,21 +94,21 @@ class CmsController extends Controller
         ]);
     }
 
-    public function createProject(): View
+    public function createProject(MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.project-form', [
             'project' => new PortfolioProject(['is_published' => true]),
             'mode' => 'create',
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
-    public function editProject(PortfolioProject $project): View
+    public function editProject(PortfolioProject $project, MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.project-form', [
             'project' => $project,
             'mode' => 'edit',
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
@@ -107,29 +119,29 @@ class CmsController extends Controller
         ]);
     }
 
-    public function createCaseStudy(): View
+    public function createCaseStudy(MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.case-study-form', [
             'caseStudy' => new CaseStudy(['is_published' => true]),
             'mode' => 'create',
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
-    public function editCaseStudy(CaseStudy $caseStudy): View
+    public function editCaseStudy(CaseStudy $caseStudy, MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.case-study-form', [
             'caseStudy' => $caseStudy,
             'mode' => 'edit',
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
-    public function testimonials(): View
+    public function testimonials(MediaLibraryService $mediaLibrary): View
     {
         return view('admin.cms.testimonials', [
             'testimonials' => Testimonial::query()->latest()->get(),
-            'mediaAssets' => $this->websiteMediaAssets(),
+            'mediaAssets' => $mediaLibrary->all(),
         ]);
     }
 
@@ -297,38 +309,85 @@ class CmsController extends Controller
         return back()->with('status', 'Website images updated.');
     }
 
-    public function uploadMedia(Request $request): RedirectResponse
+    public function uploadMedia(Request $request, MediaLibraryService $mediaLibrary): RedirectResponse
     {
-        return $this->handleMediaUpload($request);
+        return $this->handleMediaUpload($request, $mediaLibrary);
     }
 
-    public function uploadWebsiteMedia(Request $request): RedirectResponse
+    public function uploadWebsiteMedia(Request $request, MediaLibraryService $mediaLibrary): RedirectResponse
     {
-        return $this->handleMediaUpload($request);
+        return $this->handleMediaUpload($request, $mediaLibrary);
     }
 
-    private function handleMediaUpload(Request $request): RedirectResponse
+    public function updateMediaAsset(Request $request, MediaAsset $asset, MediaLibraryService $mediaLibrary): RedirectResponse
     {
         $data = $request->validate([
-            'media_file' => ['required', 'file', 'max:4096', 'mimetypes:image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,image/vnd.microsoft.icon'],
+            'folder' => ['required', 'string', 'max:100'],
+            'tags' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $file = $data['media_file'];
-        $directory = public_path('uploads/branding');
+        $mediaLibrary->updateMeta($asset, $data);
 
-        if (! File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true);
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($asset)
+            ->event('media_updated')
+            ->withProperties($data)
+            ->log('Media asset updated');
+
+        return back()->with('status', 'Media asset updated.');
+    }
+
+    public function replaceMediaAsset(Request $request, MediaAsset $asset, MediaLibraryService $mediaLibrary): RedirectResponse
+    {
+        $data = $request->validate([
+            'media_file' => ['required', 'file', 'max:8192', 'mimetypes:image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,image/vnd.microsoft.icon'],
+        ]);
+
+        $mediaLibrary->replace($asset, $data['media_file']);
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($asset)
+            ->event('media_replaced')
+            ->log('Media asset replaced');
+
+        return back()->with('status', 'Media asset replaced.');
+    }
+
+    public function destroyMediaAsset(Request $request, MediaAsset $asset, MediaLibraryService $mediaLibrary): RedirectResponse
+    {
+        if (! $mediaLibrary->delete($asset)) {
+            return back()->with('status', 'This asset is still in use and cannot be deleted yet.');
         }
 
-        $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'png');
-        $filename = now()->format('YmdHis').'-'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$extension;
+        activity()
+            ->causedBy($request->user())
+            ->event('media_deleted')
+            ->withProperties(['path' => $asset->path])
+            ->log('Media asset deleted');
 
-        $file->move($directory, $filename);
+        return back()->with('status', 'Media asset deleted.');
+    }
+
+    private function handleMediaUpload(Request $request, MediaLibraryService $mediaLibrary): RedirectResponse
+    {
+        $data = $request->validate([
+            'media_file' => ['required', 'file', 'max:8192', 'mimetypes:image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,image/vnd.microsoft.icon'],
+        ]);
+
+        $asset = $mediaLibrary->upload($data['media_file'], 'media');
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($asset)
+            ->event('media_uploaded')
+            ->log('Media asset uploaded');
 
         return back()
             ->with('status', 'Media uploaded successfully.')
-            ->with('uploaded_media_path', 'uploads/branding/'.$filename)
-            ->with('uploaded_media_name', $filename);
+            ->with('uploaded_media_path', $asset->path)
+            ->with('uploaded_media_name', $asset->name);
     }
 
     private function uniqueSlug(string $modelClass, string $title): string
@@ -343,37 +402,6 @@ class CmsController extends Controller
         }
 
         return $slug;
-    }
-
-    private function websiteMediaAssets(): array
-    {
-        $directories = [
-            public_path('uploads/branding'),
-            public_path('assets/legacy'),
-        ];
-
-        $assets = collect($directories)
-            ->filter(fn (string $directory) => File::exists($directory))
-            ->flatMap(function (string $directory) {
-                return collect(File::files($directory))
-                    ->filter(fn ($file) => in_array(strtolower($file->getExtension()), ['png', 'jpg', 'jpeg', 'webp', 'svg', 'ico']))
-                    ->map(function ($file) {
-                        $relativePath = str_replace(public_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
-                        $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
-
-                        return [
-                            'name' => $file->getFilename(),
-                            'path' => $relativePath,
-                            'url' => asset($relativePath),
-                            'extension' => strtolower($file->getExtension()),
-                        ];
-                    });
-            })
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values()
-            ->all();
-
-        return $assets;
     }
 
     private function filterImageMap(array $submitted, array $current): array

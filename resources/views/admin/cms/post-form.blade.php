@@ -17,13 +17,14 @@
         <a href="{{ route('admin.cms.index') }}" class="dashboard-subnav-link">Overview</a>
         <a href="{{ route('admin.cms.website-details') }}" class="dashboard-subnav-link">Website Details</a>
         <a href="{{ route('admin.cms.images') }}" class="dashboard-subnav-link">Images</a>
+        <a href="{{ route('admin.cms.media.index') }}" class="dashboard-subnav-link">Media Library</a>
         <a href="{{ route('admin.cms.posts.index') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Blog Posts</a>
         <a href="{{ route('admin.cms.projects.index') }}" class="dashboard-subnav-link">Portfolio</a>
         <a href="{{ route('admin.cms.case-studies.index') }}" class="dashboard-subnav-link">Case Studies</a>
         <a href="{{ route('admin.cms.testimonials.index') }}" class="dashboard-subnav-link">Testimonials</a>
     </div>
 
-    <div class="grid gap-6 xl:grid-cols-[1fr_0.82fr]" x-data="window.singleMediaPicker(@js(old('cover_image', $post->cover_image)))">
+    <div class="grid gap-6 xl:grid-cols-[1fr_0.82fr]" x-data="singleMediaPicker(@js(old('cover_image', $post->cover_image)))">
         <div class="card">
             <div class="panel-title">{{ $mode === 'create' ? 'New Blog Post' : 'Manage Blog Post' }}</div>
             <form method="POST" action="{{ $mode === 'create' ? route('admin.cms.posts.store') : route('admin.cms.posts.update', $post) }}" class="mt-6 grid gap-4">

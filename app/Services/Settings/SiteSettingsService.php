@@ -12,6 +12,8 @@ class SiteSettingsService
     private ?array $generalMailSettingsCache = null;
     private ?array $hrMailSettingsCache = null;
     private ?array $websiteImagesCache = null;
+    private ?array $storePaymentSettingsCache = null;
+    private ?array $whmcsSettingsCache = null;
 
     public function getCompanyProfile(): array
     {
@@ -81,6 +83,82 @@ class SiteSettingsService
             [
                 'group' => 'website',
                 'value' => $settings,
+                'type' => 'json',
+                'is_public' => false,
+            ]
+        );
+    }
+
+    public function getStorePaymentSettings(): array
+    {
+        if ($this->storePaymentSettingsCache !== null) {
+            return $this->storePaymentSettingsCache;
+        }
+
+        $defaults = [
+            'razorpay_key_id' => (string) config('razorpay.key_id', ''),
+            'razorpay_key_secret' => (string) config('razorpay.key_secret', ''),
+            'razorpay_webhook_secret' => (string) config('razorpay.webhook_secret', ''),
+        ];
+
+        $stored = SiteSetting::query()
+            ->where('key', 'store_payment_settings')
+            ->first()?->value;
+
+        return $this->storePaymentSettingsCache = array_merge($defaults, is_array($stored) ? $stored : []);
+    }
+
+    public function getWhmcsSettings(): array
+    {
+        if ($this->whmcsSettingsCache !== null) {
+            return $this->whmcsSettingsCache;
+        }
+
+        $defaults = [
+            'base_url' => (string) config('whmcs.base_url', ''),
+            'identifier' => (string) config('whmcs.identifier', ''),
+            'secret' => (string) config('whmcs.secret', ''),
+            'access_key' => (string) config('whmcs.access_key', ''),
+            'sso_redirect' => (string) config('whmcs.sso_redirect', '/clientarea.php'),
+            'timeout' => (int) config('whmcs.timeout', 10),
+            'cache_ttl' => (int) config('whmcs.cache_ttl', 300),
+        ];
+
+        $stored = SiteSetting::query()
+            ->where('key', 'whmcs_settings')
+            ->first()?->value;
+
+        return $this->whmcsSettingsCache = array_merge($defaults, is_array($stored) ? $stored : []);
+    }
+
+    public function putWhmcsSettings(array $settings): void
+    {
+        $current = $this->getWhmcsSettings();
+        $merged = $this->preserveSecretFields($current, $settings, ['secret', 'access_key']);
+        $this->whmcsSettingsCache = $merged;
+
+        SiteSetting::query()->updateOrCreate(
+            ['key' => 'whmcs_settings'],
+            [
+                'group' => 'integrations',
+                'value' => $merged,
+                'type' => 'json',
+                'is_public' => false,
+            ]
+        );
+    }
+
+    public function putStorePaymentSettings(array $settings): void
+    {
+        $current = $this->getStorePaymentSettings();
+        $merged = $this->preserveSecretFields($current, $settings, ['razorpay_key_secret', 'razorpay_webhook_secret']);
+        $this->storePaymentSettingsCache = $merged;
+
+        SiteSetting::query()->updateOrCreate(
+            ['key' => 'store_payment_settings'],
+            [
+                'group' => 'store',
+                'value' => $merged,
                 'type' => 'json',
                 'is_public' => false,
             ]

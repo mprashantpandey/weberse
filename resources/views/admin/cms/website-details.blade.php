@@ -23,6 +23,7 @@
         <a href="{{ route('admin.cms.index') }}" class="dashboard-subnav-link">Overview</a>
         <a href="{{ route('admin.cms.website-details') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Website Details</a>
         <a href="{{ route('admin.cms.images') }}" class="dashboard-subnav-link">Images</a>
+        <a href="{{ route('admin.cms.media.index') }}" class="dashboard-subnav-link">Media Library</a>
         <a href="{{ route('admin.cms.posts.index') }}" class="dashboard-subnav-link">Blog Posts</a>
         <a href="{{ route('admin.cms.projects.index') }}" class="dashboard-subnav-link">Portfolio</a>
         <a href="{{ route('admin.cms.case-studies.index') }}" class="dashboard-subnav-link">Case Studies</a>
@@ -31,7 +32,7 @@
 
     <div
         class="grid gap-6 xl:grid-cols-[1fr_0.84fr]"
-        x-data="window.targetedMediaPicker(
+        x-data="targetedMediaPicker(
             {
                 light_logo: @js(old('light_logo', $profile['light_logo'] ?? '')),
                 dark_logo: @js(old('dark_logo', $profile['dark_logo'] ?? '')),

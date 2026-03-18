@@ -34,6 +34,7 @@
         <a href="{{ route('admin.cms.index') }}" class="dashboard-subnav-link">Overview</a>
         <a href="{{ route('admin.cms.website-details') }}" class="dashboard-subnav-link">Website Details</a>
         <a href="{{ route('admin.cms.images') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Images</a>
+        <a href="{{ route('admin.cms.media.index') }}" class="dashboard-subnav-link">Media Library</a>
         <a href="{{ route('admin.cms.posts.index') }}" class="dashboard-subnav-link">Blog Posts</a>
         <a href="{{ route('admin.cms.projects.index') }}" class="dashboard-subnav-link">Portfolio</a>
         <a href="{{ route('admin.cms.case-studies.index') }}" class="dashboard-subnav-link">Case Studies</a>
@@ -42,7 +43,7 @@
 
     <div
         class="grid gap-6 xl:grid-cols-[1.2fr_0.9fr]"
-        x-data="window.websiteImageManager(
+        x-data="websiteImageManager(
             @js($websiteImages),
             @js(collect($imageGroups)->flatMap(fn ($group, $groupKey) => collect($group['items'])->mapWithKeys(fn ($label, $itemKey) => [$groupKey.'.'.$itemKey => $label]))->all())
         )"

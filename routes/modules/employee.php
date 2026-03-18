@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:admin|hr|sales|support'])->prefix('employee')->name('employee.')->group(function () {
     Route::get('/', [WorkspaceController::class, 'dashboard'])->name('dashboard');
+    Route::get('/attendance', [WorkspaceController::class, 'attendance'])->name('attendance.index');
+    Route::post('/attendance', [WorkspaceController::class, 'storeAttendance'])->name('attendance.store');
     Route::get('/leaves', [WorkspaceController::class, 'leaves'])->name('leaves.index');
     Route::post('/leaves', [WorkspaceController::class, 'storeLeave'])->name('leaves.store');
     Route::get('/expenses', [WorkspaceController::class, 'expenses'])->name('expenses.index');

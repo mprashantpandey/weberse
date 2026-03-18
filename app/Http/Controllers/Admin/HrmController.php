@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\CandidateInterviewScheduled;
 use App\Mail\InternalInterviewScheduled;
 use App\Services\Communication\EmailCenterService;
+use App\Models\HRM\AttendanceRecord;
 use App\Models\HRM\CompensationRecord;
 use App\Models\HRM\Department;
 use App\Models\HRM\EmployeeProfile;
@@ -14,6 +15,7 @@ use App\Models\HRM\ExpenseClaim;
 use App\Models\HRM\InterviewSchedule;
 use App\Models\HRM\JobApplication;
 use App\Models\HRM\JobOpening;
+use App\Models\HRM\LeaveRequest;
 use App\Services\Mail\PlatformMailConfigurator;
 use App\Services\Settings\SiteSettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -37,7 +39,30 @@ class HrmController extends Controller
                 'applications' => JobApplication::query()->count(),
                 'screening' => JobApplication::query()->where('status', 'screening')->count(),
                 'employees' => EmployeeProfile::query()->count(),
+                'pending_leaves' => LeaveRequest::query()->where('status', 'pending')->count(),
+                'today_attendance' => AttendanceRecord::query()->whereDate('work_date', today())->count(),
             ],
+        ]);
+    }
+
+    public function leaves(): View
+    {
+        return view('admin.hrm.leaves', [
+            'leaves' => LeaveRequest::query()
+                ->with(['employeeProfile.user', 'employeeProfile.department', 'reviewer'])
+                ->latest('start_date')
+                ->get(),
+        ]);
+    }
+
+    public function attendance(): View
+    {
+        return view('admin.hrm.attendance', [
+            'records' => AttendanceRecord::query()
+                ->with(['employeeProfile.user', 'employeeProfile.department', 'marker'])
+                ->latest('work_date')
+                ->get(),
+            'employees' => EmployeeProfile::query()->with('user')->orderBy('employee_code')->get(),
         ]);
     }
 
@@ -202,6 +227,68 @@ class HrmController extends Controller
         $application->update($data);
 
         return back()->with('status', 'Application updated.');
+    }
+
+    public function updateLeave(Request $request, LeaveRequest $leave): RedirectResponse
+    {
+        $data = $request->validate([
+            'status' => ['required', 'string', 'max:50'],
+            'reason' => ['nullable', 'string'],
+        ]);
+
+        $leave->update([
+            'status' => $data['status'],
+            'reason' => $data['reason'] ?? $leave->reason,
+            'reviewed_by' => $request->user()?->id,
+            'reviewed_at' => now(),
+        ]);
+
+        return back()->with('status', 'Leave request updated.');
+    }
+
+    public function storeAttendance(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'employee_profile_id' => ['required', 'exists:employee_profiles,id'],
+            'work_date' => ['required', 'date'],
+            'clock_in_at' => ['nullable', 'date'],
+            'clock_out_at' => ['nullable', 'date', 'after_or_equal:clock_in_at'],
+            'status' => ['required', 'string', 'max:50'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        AttendanceRecord::query()->updateOrCreate(
+            [
+                'employee_profile_id' => $data['employee_profile_id'],
+                'work_date' => $data['work_date'],
+            ],
+            [
+                'marked_by' => $request->user()?->id,
+                'clock_in_at' => $data['clock_in_at'] ?? null,
+                'clock_out_at' => $data['clock_out_at'] ?? null,
+                'status' => $data['status'],
+                'notes' => $data['notes'] ?? null,
+            ]
+        );
+
+        return back()->with('status', 'Attendance record saved.');
+    }
+
+    public function updateAttendance(Request $request, AttendanceRecord $attendance): RedirectResponse
+    {
+        $data = $request->validate([
+            'clock_in_at' => ['nullable', 'date'],
+            'clock_out_at' => ['nullable', 'date', 'after_or_equal:clock_in_at'],
+            'status' => ['required', 'string', 'max:50'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $attendance->update([
+            ...$data,
+            'marked_by' => $request->user()?->id,
+        ]);
+
+        return back()->with('status', 'Attendance updated.');
     }
 
     public function storeInterview(

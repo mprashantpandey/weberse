@@ -74,6 +74,20 @@
                     </div>
                     <div class="status-badge">Active</div>
                 </button>
+                <button type="button" class="settings-nav-item" :class="activeSection === 'whmcs-settings' ? 'settings-nav-item-active' : ''" @click="jumpTo('whmcs-settings')">
+                    <div>
+                        <div class="font-semibold text-slate-800">WHMCS API</div>
+                        <div class="mt-1 text-slate-500">Billing subdomain, API credentials, SSO redirect, timeout, and cache settings.</div>
+                    </div>
+                    <div class="status-badge">Active</div>
+                </button>
+                <button type="button" class="settings-nav-item" :class="activeSection === 'store-payments' ? 'settings-nav-item-active' : ''" @click="jumpTo('store-payments')">
+                    <div>
+                        <div class="font-semibold text-slate-800">Store Payments</div>
+                        <div class="mt-1 text-slate-500">Configure Razorpay keys and webhook secret for the Weberse store.</div>
+                    </div>
+                    <div class="status-badge">Active</div>
+                </button>
             </div>
         </div>
 
@@ -116,6 +130,10 @@
                     <label class="block">
                         <span class="text-sm font-medium text-slate-700">From name</span>
                         <input class="input mt-2" name="from_name" value="{{ old('from_name', $generalMailSettings['from_name']) }}" placeholder="Weberse Infotech">
+                    </label>
+                    <label class="block md:col-span-2">
+                        <span class="text-sm font-medium text-slate-700">Current password</span>
+                        <input class="input mt-2" type="password" name="current_password" placeholder="Required to save email settings" required>
                     </label>
                     <div class="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                         Leaving the password blank keeps the currently saved SMTP password.
@@ -172,6 +190,10 @@
                     <label class="block">
                         <span class="text-sm font-medium text-slate-700">Admin alert email</span>
                         <input class="input mt-2" type="email" name="admin_alert_email" value="{{ old('admin_alert_email', $hrMailSettings['admin_alert_email']) }}" placeholder="admin@weberse.com">
+                    </label>
+                    <label class="block md:col-span-2">
+                        <span class="text-sm font-medium text-slate-700">Current password</span>
+                        <input class="input mt-2" type="password" name="current_password" placeholder="Required to save HR email settings" required>
                     </label>
                     <div class="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                         Leaving the password blank keeps the currently saved HR SMTP password.
@@ -242,6 +264,10 @@
                         <input class="input mt-2" name="google_tag_manager_id" value="{{ old('google_tag_manager_id', $integrationSettings['google_tag_manager_id'] ?? '') }}" placeholder="GTM-XXXXXXX">
                     </label>
                     <label class="block md:col-span-2">
+                        <span class="text-sm font-medium text-slate-700">Current password</span>
+                        <input class="input mt-2" type="password" name="current_password" placeholder="Required to save integration settings" required>
+                    </label>
+                    <label class="block md:col-span-2">
                         <span class="text-sm font-medium text-slate-700">Head snippet</span>
                         <textarea class="input mt-2 min-h-40" name="head_snippet" placeholder="Script or meta tags to inject before </head>">{{ old('head_snippet', $integrationSettings['head_snippet'] ?? '') }}</textarea>
                     </label>
@@ -251,6 +277,87 @@
                     </label>
                     <div class="md:col-span-2">
                         <button class="btn-primary">Save Integration Settings</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card settings-section-card scroll-mt-28" id="whmcs-settings" data-settings-section>
+                <div class="panel-title">WHMCS API Settings</div>
+                <div class="panel-subtitle">This is where the platform connects to your WHMCS billing install for services, invoices, domains, and client lookups.</div>
+
+                <form method="POST" action="{{ route('admin.settings.whmcs.update') }}" class="mt-6 grid gap-4 md:grid-cols-2">
+                    @csrf
+                    @method('PATCH')
+                    <label class="block md:col-span-2">
+                        <span class="text-sm font-medium text-slate-700">WHMCS Base URL</span>
+                        <input class="input mt-2" type="url" name="base_url" value="{{ old('base_url', $whmcsSettings['base_url']) }}" placeholder="https://billing.weberse.com" required>
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">API Identifier</span>
+                        <input class="input mt-2" name="identifier" value="{{ old('identifier', $whmcsSettings['identifier']) }}" placeholder="WHMCS API identifier">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">API Secret</span>
+                        <input class="input mt-2" type="password" name="secret" placeholder="Leave blank to keep the current secret">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">Access Key</span>
+                        <input class="input mt-2" type="password" name="access_key" placeholder="Leave blank to keep the current access key">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">SSO Redirect Path</span>
+                        <input class="input mt-2" name="sso_redirect" value="{{ old('sso_redirect', $whmcsSettings['sso_redirect']) }}" placeholder="/clientarea.php">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">Timeout (seconds)</span>
+                        <input class="input mt-2" type="number" min="1" max="60" name="timeout" value="{{ old('timeout', $whmcsSettings['timeout']) }}" placeholder="10">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">Cache TTL (seconds)</span>
+                        <input class="input mt-2" type="number" min="0" max="86400" name="cache_ttl" value="{{ old('cache_ttl', $whmcsSettings['cache_ttl']) }}" placeholder="300">
+                    </label>
+                    <label class="block md:col-span-2">
+                        <span class="text-sm font-medium text-slate-700">Current password</span>
+                        <input class="input mt-2" type="password" name="current_password" placeholder="Required to save WHMCS settings" required>
+                    </label>
+                    <div class="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                        Leave the secret and access key blank to preserve the currently saved values.
+                    </div>
+                    <div class="md:col-span-2 flex flex-wrap gap-3">
+                        <button class="btn-primary">Save WHMCS Settings</button>
+                    </div>
+                </form>
+                <form method="POST" action="{{ route('admin.settings.whmcs.test') }}" class="mt-4">
+                    @csrf
+                    <button class="btn-dark">Test Connection</button>
+                </form>
+            </div>
+
+            <div class="card settings-section-card scroll-mt-28" id="store-payments" data-settings-section>
+                <div class="panel-title">Store Payment Settings</div>
+                <div class="panel-subtitle">Used for checkout and webhook verification. Leave secrets blank to keep saved values.</div>
+
+                <form method="POST" action="{{ route('admin.settings.store-payments.update') }}" class="mt-6 grid gap-4 md:grid-cols-2">
+                    @csrf
+                    @method('PATCH')
+                    <label class="block md:col-span-2">
+                        <span class="text-sm font-medium text-slate-700">Razorpay key ID</span>
+                        <input class="input mt-2" name="razorpay_key_id" value="{{ old('razorpay_key_id', $storePaymentSettings['razorpay_key_id'] ?? '') }}" placeholder="rzp_test_...">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">Razorpay key secret</span>
+                        <input class="input mt-2" type="password" name="razorpay_key_secret" placeholder="Leave blank to keep the current secret">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">Webhook secret</span>
+                        <input class="input mt-2" type="password" name="razorpay_webhook_secret" placeholder="Leave blank to keep the current webhook secret">
+                    </label>
+                    <label class="block md:col-span-2">
+                        <span class="text-sm font-medium text-slate-700">Current password</span>
+                        <input class="input mt-2" type="password" name="current_password" placeholder="Required to save payment settings" required>
+                    </label>
+                    <div class="md:col-span-2">
+                        <button class="btn-primary">Save Store Payment Settings</button>
                     </div>
                 </form>
             </div>

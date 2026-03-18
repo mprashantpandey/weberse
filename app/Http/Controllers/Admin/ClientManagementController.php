@@ -21,7 +21,7 @@ class ClientManagementController extends Controller
         return view('admin.clients.index', [
             'clients' => User::query()
                 ->role(UserRole::Client->value)
-                ->withCount(['supportTickets', 'activity'])
+                ->withCount(['supportTickets'])
                 ->latest()
                 ->get(),
         ]);

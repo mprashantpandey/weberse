@@ -17,15 +17,17 @@
         <a href="{{ route('admin.cms.index') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Overview</a>
         <a href="{{ route('admin.cms.website-details') }}" class="dashboard-subnav-link">Website Details</a>
         <a href="{{ route('admin.cms.images') }}" class="dashboard-subnav-link">Images</a>
+        <a href="{{ route('admin.cms.media.index') }}" class="dashboard-subnav-link">Media Library</a>
         <a href="{{ route('admin.cms.posts.index') }}" class="dashboard-subnav-link">Blog Posts</a>
         <a href="{{ route('admin.cms.projects.index') }}" class="dashboard-subnav-link">Portfolio</a>
         <a href="{{ route('admin.cms.case-studies.index') }}" class="dashboard-subnav-link">Case Studies</a>
         <a href="{{ route('admin.cms.testimonials.index') }}" class="dashboard-subnav-link">Testimonials</a>
     </div>
 
-    <div class="grid gap-6 md:grid-cols-6">
+    <div class="grid gap-6 md:grid-cols-7">
         <div class="metric-card"><div class="metric-label">Website Details</div><div class="metric-value">{{ $summary['website_details'] }}</div></div>
         <div class="metric-card"><div class="metric-label">Website Images</div><div class="metric-value">{{ $summary['website_images'] }}</div></div>
+        <div class="metric-card"><div class="metric-label">Media Assets</div><div class="metric-value">{{ $summary['media_assets'] }}</div></div>
         <div class="metric-card"><div class="metric-label">Posts</div><div class="metric-value">{{ $summary['posts'] }}</div></div>
         <div class="metric-card"><div class="metric-label">Projects</div><div class="metric-value">{{ $summary['projects'] }}</div></div>
         <div class="metric-card"><div class="metric-label">Case Studies</div><div class="metric-value">{{ $summary['case_studies'] }}</div></div>

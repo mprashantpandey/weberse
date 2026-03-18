@@ -150,76 +150,78 @@ const simpleIconMap = {
     langchain: siLangchain,
 };
 
-window.websiteImageManager = (initialFields = {}, labels = {}) => ({
-    fields: initialFields,
-    activeImageKey: 'home.hero_dashboard',
-    libraryOpen: false,
-    targetLabels: labels,
-    resolveAsset(path) {
-        if (!path) return '';
-        if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) return path;
-        return `${window.location.origin}/${String(path).replace(/^\/+/, '')}`;
-    },
-    valueFor(key) {
-        return String(key).split('.').reduce((carry, segment) => (carry?.[segment] ?? ''), this.fields);
-    },
-    focusLibrary(key) {
-        this.activeImageKey = key;
-        this.libraryOpen = true;
-    },
-    assignAsset(path) {
-        const segments = String(this.activeImageKey).split('.');
-        let target = this.fields;
-
-        while (segments.length > 1) {
-            target = target[segments.shift()];
-        }
-
-        target[segments[0]] = path;
-        this.libraryOpen = false;
-    },
-});
-
 const resolveManagedAsset = (path) => {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) return path;
     return `${window.location.origin}/${String(path).replace(/^\/+/, '')}`;
 };
 
-window.singleMediaPicker = (initialValue = '') => ({
-    selectedImage: initialValue,
-    libraryOpen: false,
-    resolveAsset(path) {
-        return resolveManagedAsset(path);
-    },
-    focusLibrary() {
-        this.libraryOpen = true;
-    },
-    assignAsset(path) {
-        this.selectedImage = path;
-        this.libraryOpen = false;
-    },
-});
-
-window.targetedMediaPicker = (initialValues = {}, labels = {}, defaultTarget = 'default') => ({
-    values: initialValues,
-    targetLabels: labels,
-    activeTarget: defaultTarget,
-    libraryOpen: false,
-    resolveAsset(path) {
-        return resolveManagedAsset(path);
-    },
-    focusLibrary(target) {
-        this.activeTarget = String(target);
-        this.libraryOpen = true;
-    },
-    assignAsset(path) {
-        this.values[String(this.activeTarget)] = path;
-        this.libraryOpen = false;
-    },
-});
-
 document.addEventListener('alpine:init', () => {
+    Alpine.data('websiteImageManager', (initialFields = {}, labels = {}) => ({
+        fields: initialFields,
+        activeImageKey: 'home.hero_dashboard',
+        libraryOpen: false,
+        targetLabels: labels,
+        resolveAsset(path) {
+            return resolveManagedAsset(path);
+        },
+        valueFor(key) {
+            return String(key).split('.').reduce((carry, segment) => (carry?.[segment] ?? ''), this.fields);
+        },
+        focusLibrary(key) {
+            this.activeImageKey = String(key);
+            this.libraryOpen = true;
+        },
+        assignAsset(path) {
+            const segments = String(this.activeImageKey).split('.');
+            let target = this.fields;
+
+            while (segments.length > 1) {
+                const segment = segments.shift();
+                if (!target[segment] || typeof target[segment] !== 'object') {
+                    target[segment] = {};
+                }
+                target = target[segment];
+            }
+
+            target[segments[0]] = path;
+            this.libraryOpen = false;
+        },
+    }));
+
+    Alpine.data('singleMediaPicker', (initialValue = '') => ({
+        selectedImage: initialValue,
+        libraryOpen: false,
+        resolveAsset(path) {
+            return resolveManagedAsset(path);
+        },
+        focusLibrary() {
+            this.libraryOpen = true;
+        },
+        assignAsset(path) {
+            this.selectedImage = path;
+            this.libraryOpen = false;
+        },
+    }));
+
+    Alpine.data('targetedMediaPicker', (initialValues = {}, labels = {}, defaultTarget = 'default') => ({
+        values: initialValues,
+        targetLabels: labels,
+        activeTarget: String(defaultTarget),
+        libraryOpen: false,
+        resolveAsset(path) {
+            return resolveManagedAsset(path);
+        },
+        focusLibrary(target) {
+            this.activeTarget = String(target);
+            this.libraryOpen = true;
+        },
+        assignAsset(path) {
+            this.values[String(this.activeTarget)] = path;
+            this.libraryOpen = false;
+        },
+    }));
+
     Alpine.store('marketingPopup', {
         open: false,
         mode: 'lead',

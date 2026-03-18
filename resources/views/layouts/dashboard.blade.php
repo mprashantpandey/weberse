@@ -11,11 +11,15 @@
         $navIcons = [
             'Overview' => 'dashboard',
             'CMS' => 'layers',
+            'Clients' => 'briefcase',
+            'Store' => 'cart',
             'CRM' => 'users',
             'HRM' => 'briefcase',
             'Jobs' => 'briefcase',
             'Applications' => 'file',
             'Employees' => 'user',
+            'Leave' => 'calendar',
+            'Attendance' => 'clock',
             'Interviews' => 'calendar',
             'Compensation' => 'receipt',
             'Expenses' => 'wallet',
@@ -28,12 +32,28 @@
             'Compose' => 'mail',
             'Analytics' => 'chart',
             'Settings' => 'settings',
+            'Security' => 'shield',
             'Hosting' => 'server',
+            'Domains' => 'globe',
             'Invoices' => 'receipt',
             'Documents' => 'folder',
             'Profile' => 'user',
         ];
         $resolvedNav = $nav ?? [];
+        if (auth()->user()?->hasRole('admin') && ! collect($resolvedNav)->contains(fn ($item) => ($item['label'] ?? null) === 'Clients')) {
+            array_splice($resolvedNav, 1, 0, [[
+                'label' => 'Clients',
+                'route' => 'admin.clients.index',
+                'active' => 'admin.clients.*',
+            ]]);
+        }
+        if (auth()->user()?->hasRole('admin') && ! collect($resolvedNav)->contains(fn ($item) => ($item['label'] ?? null) === 'Store')) {
+            array_splice($resolvedNav, 2, 0, [[
+                'label' => 'Store',
+                'route' => 'admin.store.products.index',
+                'active' => 'admin.store.*',
+            ]]);
+        }
         if (auth()->user()?->hasRole('admin')) {
             $resolvedNav[] = ['label' => 'Email', 'route' => 'admin.email.index', 'active' => 'admin.email.*'];
             $resolvedNav[] = ['label' => 'Settings', 'route' => 'admin.settings.index', 'active' => 'admin.settings.*'];
@@ -128,9 +148,17 @@
                 <div class="relative z-10 flex flex-wrap items-center gap-3">
                     <div class="topbar-pill">@include('website.partials.icon', ['name' => 'calendar', 'class' => 'h-4 w-4']) {{ now()->format('d M Y') }}</div>
                     <div class="topbar-pill">@include('website.partials.icon', ['name' => 'user', 'class' => 'h-4 w-4']) {{ auth()->user()->job_title ?: 'Weberse User' }}</div>
+                    @if (auth()->user()?->hasAnyRole(['admin', 'hr', 'sales', 'support']))
+                        @if (request()->routeIs('employee.*'))
+                            <a href="{{ route('admin.dashboard') }}" class="btn-dark">@include('website.partials.icon', ['name' => 'dashboard', 'class' => 'h-4 w-4']) Admin Workspace</a>
+                        @else
+                            <a href="{{ route('employee.dashboard') }}" class="btn-dark">@include('website.partials.icon', ['name' => 'user', 'class' => 'h-4 w-4']) Employee Workspace</a>
+                        @endif
+                    @endif
                     @if (auth()->user()?->hasRole('admin'))
                         <a href="{{ route('admin.settings.index') }}" class="btn-dark">@include('website.partials.icon', ['name' => 'settings', 'class' => 'h-4 w-4']) Settings</a>
                     @endif
+                    <a href="{{ route('security.index') }}" class="btn-dark">@include('website.partials.icon', ['name' => 'shield', 'class' => 'h-4 w-4']) Security</a>
                     @isset($headerAction)
                         {{ $headerAction }}
                     @endisset

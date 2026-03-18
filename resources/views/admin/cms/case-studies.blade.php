@@ -21,6 +21,7 @@
         <a href="{{ route('admin.cms.index') }}" class="dashboard-subnav-link">Overview</a>
         <a href="{{ route('admin.cms.website-details') }}" class="dashboard-subnav-link">Website Details</a>
         <a href="{{ route('admin.cms.images') }}" class="dashboard-subnav-link">Images</a>
+        <a href="{{ route('admin.cms.media.index') }}" class="dashboard-subnav-link">Media Library</a>
         <a href="{{ route('admin.cms.posts.index') }}" class="dashboard-subnav-link">Blog Posts</a>
         <a href="{{ route('admin.cms.projects.index') }}" class="dashboard-subnav-link">Portfolio</a>
         <a href="{{ route('admin.cms.case-studies.index') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Case Studies</a>

@@ -41,61 +41,79 @@ class DatabaseSeeder extends Seeder
             Role::findOrCreate($role, 'web');
         }
 
-        $admin = User::factory()->create([
-            'name' => 'Weberse Admin',
-            'email' => 'admin@weberse.test',
-            'job_title' => 'Platform Administrator',
-            'password' => Hash::make('password'),
-        ]);
+        $admin = User::query()->updateOrCreate(
+            ['email' => 'admin@weberse.test'],
+            [
+                'name' => 'Weberse Admin',
+                'job_title' => 'Platform Administrator',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
         $admin->assignRole(UserRole::Admin->value);
 
-        $sales = User::factory()->create([
-            'name' => 'Sales Manager',
-            'email' => 'sales@weberse.test',
-            'password' => Hash::make('password'),
-        ]);
+        $sales = User::query()->updateOrCreate(
+            ['email' => 'sales@weberse.test'],
+            [
+                'name' => 'Sales Manager',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
         $sales->assignRole(UserRole::Sales->value);
 
-        $hr = User::factory()->create([
-            'name' => 'HR Manager',
-            'email' => 'hr@weberse.test',
-            'password' => Hash::make('password'),
-        ]);
+        $hr = User::query()->updateOrCreate(
+            ['email' => 'hr@weberse.test'],
+            [
+                'name' => 'HR Manager',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
         $hr->assignRole(UserRole::HR->value);
 
-        $support = User::factory()->create([
-            'name' => 'Support Agent',
-            'email' => 'support@weberse.test',
-            'password' => Hash::make('password'),
-        ]);
+        $support = User::query()->updateOrCreate(
+            ['email' => 'support@weberse.test'],
+            [
+                'name' => 'Support Agent',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
         $support->assignRole(UserRole::Support->value);
 
-        $client = User::factory()->create([
-            'name' => 'Client User',
-            'email' => 'client@weberse.test',
-            'whmcs_client_id' => 1001,
-            'password' => Hash::make('password'),
-        ]);
+        $client = User::query()->updateOrCreate(
+            ['email' => 'client@weberse.test'],
+            [
+                'name' => 'Client User',
+                'whmcs_client_id' => 1001,
+                'password' => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
         $client->assignRole(UserRole::Client->value);
 
-        SiteSetting::query()->create([
-            'group' => 'branding',
-            'key' => 'company_profile',
-            'value' => [
-                'company' => 'Weberse Infotech Private Limited',
-                'tagline' => 'Innovating Intelligence. Building the Future.',
-                'email' => 'hello@weberse.com',
-                'phone' => '+91 98765 43210',
-                'socials' => [
-                    'linkedin' => 'https://linkedin.com/company/weberse',
-                    'instagram' => 'https://instagram.com/weberse',
+        SiteSetting::query()->updateOrCreate(
+            ['key' => 'company_profile'],
+            [
+                'group' => 'branding',
+                'value' => [
+                    'company' => 'Weberse Infotech Private Limited',
+                    'tagline' => 'Innovating Intelligence. Building the Future.',
+                    'email' => 'hello@weberse.com',
+                    'phone' => '+91 98765 43210',
+                    'socials' => [
+                        'linkedin' => 'https://linkedin.com/company/weberse',
+                        'instagram' => 'https://instagram.com/weberse',
+                    ],
                 ],
-            ],
-            'type' => 'json',
-            'is_public' => true,
-        ]);
+                'type' => 'json',
+                'is_public' => true,
+            ]
+        );
 
         $this->call(EmailTemplateSeeder::class);
+        $this->call(StoreProductSeeder::class);
 
         NewsletterSubscriber::query()->insert([
             [

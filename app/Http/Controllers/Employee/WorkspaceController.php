@@ -3,19 +3,35 @@
 namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
+use App\Models\HRM\AttendanceRecord;
 use App\Models\HRM\CompensationRecord;
 use App\Models\HRM\EmployeePerk;
 use App\Models\HRM\ExpenseClaim;
 use App\Models\HRM\LeaveRequest;
+use App\Models\HRM\EmployeeProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class WorkspaceController extends Controller
 {
+    protected function resolveProfile(Request $request): EmployeeProfile
+    {
+        $user = $request->user();
+
+        return $user->employeeProfile()->firstOrCreate(
+            [],
+            [
+                'employee_code' => 'WEB-EMP-'.str_pad((string) $user->id, 4, '0', STR_PAD_LEFT),
+                'join_date' => now()->toDateString(),
+                'employment_status' => 'active',
+            ]
+        );
+    }
+
     public function dashboard(Request $request): View
     {
-        $profile = $request->user()->employeeProfile()->with(['department', 'leaveRequests', 'expenseClaims', 'compensationRecords', 'perks'])->first();
+        $profile = $this->resolveProfile($request)->load(['department', 'leaveRequests', 'expenseClaims', 'compensationRecords', 'perks']);
 
         return view('employee.dashboard.index', [
             'profile' => $profile,
@@ -28,12 +44,57 @@ class WorkspaceController extends Controller
             'recentLeaves' => $profile?->leaveRequests()->latest()->take(5)->get() ?? collect(),
             'recentExpenses' => $profile?->expenseClaims()->latest('expense_date')->take(5)->get() ?? collect(),
             'activePerks' => $profile?->perks()->where('status', 'active')->latest()->take(4)->get() ?? collect(),
+            'todayAttendance' => $profile?->attendanceRecords()->whereDate('work_date', today())->first(),
         ]);
+    }
+
+    public function attendance(Request $request): View
+    {
+        $profile = $this->resolveProfile($request)->load('department');
+
+        return view('employee.attendance.index', [
+            'profile' => $profile,
+            'todayAttendance' => $profile->attendanceRecords()->whereDate('work_date', today())->first(),
+            'records' => $profile->attendanceRecords()->latest('work_date')->get(),
+        ]);
+    }
+
+    public function storeAttendance(Request $request): RedirectResponse
+    {
+        $profile = $this->resolveProfile($request);
+        $record = $profile->attendanceRecords()->firstOrCreate(
+            ['work_date' => today()],
+            [
+                'marked_by' => $request->user()->id,
+                'status' => 'present',
+            ]
+        );
+
+        if (! $record->clock_in_at) {
+            $record->update([
+                'clock_in_at' => now(),
+                'status' => 'present',
+                'marked_by' => $request->user()->id,
+            ]);
+
+            return back()->with('status', 'Checked in successfully.');
+        }
+
+        if (! $record->clock_out_at) {
+            $record->update([
+                'clock_out_at' => now(),
+                'marked_by' => $request->user()->id,
+            ]);
+
+            return back()->with('status', 'Checked out successfully.');
+        }
+
+        return back()->with('status', 'Attendance for today is already completed.');
     }
 
     public function leaves(Request $request): View
     {
-        $profile = $request->user()->employeeProfile()->with('department')->firstOrFail();
+        $profile = $this->resolveProfile($request)->load('department');
 
         return view('employee.leaves.index', [
             'profile' => $profile,
@@ -43,7 +104,7 @@ class WorkspaceController extends Controller
 
     public function storeLeave(Request $request): RedirectResponse
     {
-        $profile = $request->user()->employeeProfile()->firstOrFail();
+        $profile = $this->resolveProfile($request);
 
         $data = $request->validate([
             'type' => ['required', 'string', 'max:50'],
@@ -62,7 +123,7 @@ class WorkspaceController extends Controller
 
     public function expenses(Request $request): View
     {
-        $profile = $request->user()->employeeProfile()->with('department')->firstOrFail();
+        $profile = $this->resolveProfile($request)->load('department');
 
         return view('employee.expenses.index', [
             'profile' => $profile,
@@ -72,7 +133,7 @@ class WorkspaceController extends Controller
 
     public function storeExpense(Request $request): RedirectResponse
     {
-        $profile = $request->user()->employeeProfile()->firstOrFail();
+        $profile = $this->resolveProfile($request);
 
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -96,7 +157,7 @@ class WorkspaceController extends Controller
 
     public function compensation(Request $request): View
     {
-        $profile = $request->user()->employeeProfile()->with('department')->firstOrFail();
+        $profile = $this->resolveProfile($request)->load('department');
 
         return view('employee.compensation.index', [
             'profile' => $profile,
@@ -106,7 +167,7 @@ class WorkspaceController extends Controller
 
     public function perks(Request $request): View
     {
-        $profile = $request->user()->employeeProfile()->with('department')->firstOrFail();
+        $profile = $this->resolveProfile($request)->load('department');
 
         return view('employee.perks.index', [
             'profile' => $profile,
@@ -116,7 +177,7 @@ class WorkspaceController extends Controller
 
     public function profile(Request $request): View
     {
-        $profile = $request->user()->employeeProfile()->with('department')->first();
+        $profile = $this->resolveProfile($request)->load('department');
 
         return view('employee.profile.index', [
             'profile' => $profile,
@@ -127,7 +188,7 @@ class WorkspaceController extends Controller
     public function updateProfile(Request $request): RedirectResponse
     {
         $user = $request->user();
-        $profile = $user->employeeProfile()->firstOrFail();
+        $profile = $this->resolveProfile($request);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],

@@ -51,4 +51,9 @@ class PlatformMailConfigurator
 
         return true;
     }
+
+    public function mailer(string $scope = 'general'): ?string
+    {
+        return $this->apply($scope) ? 'platform_dynamic' : null;
+    }
 }

@@ -34,6 +34,11 @@ class EmployeeProfile extends Model
         return $this->hasMany(LeaveRequest::class);
     }
 
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
     public function compensationRecords(): HasMany
     {
         return $this->hasMany(CompensationRecord::class);

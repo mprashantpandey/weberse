@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\CRM\Lead;
 use App\Models\HRM\EmployeeProfile;
+use App\Models\Store\Entitlement;
+use App\Models\Store\Order as StoreOrder;
 use App\Models\Support\SupportTicket;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
@@ -35,6 +37,9 @@ class User extends Authenticatable
         'job_title',
         'whmcs_client_id',
         'is_active',
+        'two_factor_enabled',
+        'two_factor_method',
+        'two_factor_confirmed_at',
         'last_login_at',
     ];
 
@@ -59,6 +64,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'two_factor_enabled' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
             'last_login_at' => 'datetime',
         ];
     }
@@ -78,8 +85,18 @@ class User extends Authenticatable
         return $this->hasMany(SupportTicket::class);
     }
 
+    public function storeOrders(): HasMany
+    {
+        return $this->hasMany(StoreOrder::class);
+    }
+
+    public function storeEntitlements(): HasMany
+    {
+        return $this->hasMany(Entitlement::class);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()->logOnly(['name', 'email', 'phone', 'job_title', 'is_active']);
+        return LogOptions::defaults()->logOnly(['name', 'email', 'phone', 'job_title', 'is_active', 'two_factor_enabled']);
     }
 }

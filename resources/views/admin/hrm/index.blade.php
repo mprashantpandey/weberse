@@ -16,9 +16,11 @@
     <div class="dashboard-subnav">
         <a href="{{ route('admin.hrm.index') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Overview</a>
         <a href="{{ route('admin.hrm.employees.index') }}" class="dashboard-subnav-link">Employees</a>
+        <a href="{{ route('admin.hrm.leaves.index') }}" class="dashboard-subnav-link">Leaves</a>
         <a href="{{ route('admin.hrm.jobs.index') }}" class="dashboard-subnav-link">Jobs</a>
         <a href="{{ route('admin.hrm.applications.index') }}" class="dashboard-subnav-link">Applications</a>
         <a href="{{ route('admin.hrm.interviews.index') }}" class="dashboard-subnav-link">Interviews</a>
+        <a href="{{ route('admin.hrm.attendance.index') }}" class="dashboard-subnav-link">Attendance</a>
         <a href="{{ route('admin.hrm.compensation.index') }}" class="dashboard-subnav-link">Compensation</a>
         <a href="{{ route('admin.hrm.expenses.index') }}" class="dashboard-subnav-link">Expenses</a>
         <a href="{{ route('admin.hrm.perks.index') }}" class="dashboard-subnav-link">Perks</a>
@@ -40,6 +42,14 @@
         <div class="metric-card">
             <div class="metric-label">Employees</div>
             <div class="metric-value">{{ $summary['employees'] }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Pending Leaves</div>
+            <div class="metric-value">{{ $summary['pending_leaves'] }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Today's Attendance</div>
+            <div class="metric-value">{{ $summary['today_attendance'] }}</div>
         </div>
     </div>
 

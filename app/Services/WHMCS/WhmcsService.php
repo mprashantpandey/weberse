@@ -3,7 +3,9 @@
 namespace App\Services\WHMCS;
 
 use App\Models\User;
+use App\Services\Settings\SiteSettingsService;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -11,6 +13,10 @@ use Throwable;
 
 class WhmcsService
 {
+    public function __construct(
+        protected SiteSettingsService $settings
+    ) {}
+
     public function clientSummary(User $user): array
     {
         if (! $user->whmcs_client_id) {
@@ -18,7 +24,7 @@ class WhmcsService
         }
 
         try {
-            return Cache::remember("whmcs-client-{$user->whmcs_client_id}", config('whmcs.cache_ttl'), function () use ($user) {
+            return Cache::remember("whmcs-client-{$user->whmcs_client_id}", $this->config('cache_ttl'), function () use ($user) {
                 $client = $this->getClient($user->whmcs_client_id);
                 $services = $this->normalizeServices($this->getClientsProducts($user->whmcs_client_id));
                 $invoices = $this->normalizeInvoices($this->getInvoices($user->whmcs_client_id));
@@ -54,7 +60,7 @@ class WhmcsService
     public function getSalesMetrics(): array
     {
         try {
-            return Cache::remember('whmcs-sales-metrics', config('whmcs.cache_ttl'), function () {
+            return Cache::remember('whmcs-sales-metrics', $this->config('cache_ttl'), function () {
                 $orders = $this->request([
                     'action' => 'GetOrders',
                     'limitnum' => 20,
@@ -70,13 +76,83 @@ class WhmcsService
         }
     }
 
+    public function testConnection(): array
+    {
+        try {
+            $response = $this->request([
+                'action' => 'GetConfigurationValue',
+                'setting' => 'SystemURL',
+            ]);
+
+            return [
+                'ok' => true,
+                'message' => 'WHMCS API connection successful.',
+                'system_url' => Arr::get($response, 'value'),
+                'base_url' => $this->config('base_url'),
+            ];
+        } catch (Throwable $exception) {
+            return [
+                'ok' => false,
+                'message' => $exception->getMessage(),
+                'base_url' => $this->config('base_url'),
+            ];
+        }
+    }
+
     public function buildSsoUrl(User $user): ?string
     {
         if (! $user->whmcs_client_id) {
             return null;
         }
 
-        return rtrim(config('whmcs.base_url'), '/').config('whmcs.sso_redirect');
+        return $this->createSsoRedirectUrl($user->whmcs_client_id, $this->config('sso_redirect') ?: '/clientarea.php')
+            ?? rtrim((string) $this->config('base_url'), '/').($this->config('sso_redirect') ?: '/clientarea.php');
+    }
+
+    public function invoiceUrl(User $user, int|string|null $invoiceId): ?string
+    {
+        if (! $user->whmcs_client_id || ! $invoiceId) {
+            return $this->buildSsoUrl($user);
+        }
+
+        return $this->createSsoRedirectUrl($user->whmcs_client_id, '/viewinvoice.php?id='.$invoiceId)
+            ?? $this->buildSsoUrl($user);
+    }
+
+    public function domainUrl(User $user, int|string|null $domainId): ?string
+    {
+        if (! $user->whmcs_client_id || ! $domainId) {
+            return $this->buildSsoUrl($user);
+        }
+
+        return $this->createSsoRedirectUrl($user->whmcs_client_id, '/clientarea.php?action=domaindetails&id='.$domainId)
+            ?? $this->buildSsoUrl($user);
+    }
+
+    public function serviceUrl(User $user, int|string|null $serviceId): ?string
+    {
+        if (! $user->whmcs_client_id || ! $serviceId) {
+            return $this->buildSsoUrl($user);
+        }
+
+        return $this->createSsoRedirectUrl($user->whmcs_client_id, '/clientarea.php?action=productdetails&id='.$serviceId)
+            ?? $this->buildSsoUrl($user);
+    }
+
+    protected function createSsoRedirectUrl(int $clientId, string $relativePath): ?string
+    {
+        try {
+            $response = $this->request([
+                'action' => 'CreateSsoToken',
+                'client_id' => $clientId,
+                'destination' => 'sso:custom_redirect',
+                'sso_redirect_path' => $relativePath,
+            ]);
+
+            return Arr::get($response, 'redirect_url');
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     protected function getClientsProducts(int $clientId): array
@@ -137,9 +213,9 @@ class WhmcsService
         $response = $this->client()
             ->asForm()
             ->post('/includes/api.php', array_merge($payload, [
-                'identifier' => config('whmcs.identifier'),
-                'secret' => config('whmcs.secret'),
-                'accesskey' => config('whmcs.access_key'),
+                'identifier' => $this->config('identifier'),
+                'secret' => $this->config('secret'),
+                'accesskey' => $this->config('access_key'),
                 'responsetype' => 'json',
             ]))
             ->throw()
@@ -154,9 +230,9 @@ class WhmcsService
 
     protected function client(): PendingRequest
     {
-        return Http::baseUrl(rtrim(config('whmcs.base_url'), '/'))
+        return Http::baseUrl(rtrim((string) $this->config('base_url'), '/'))
             ->acceptJson()
-            ->timeout(config('whmcs.timeout'));
+            ->timeout((int) $this->config('timeout'));
     }
 
     protected function normalizeServices(array $services): array
@@ -228,5 +304,10 @@ class WhmcsService
                 'domains_count' => 0,
             ],
         ];
+    }
+
+    protected function config(string $key): mixed
+    {
+        return $this->settings->getWhmcsSettings()[$key] ?? config("whmcs.{$key}");
     }
 }

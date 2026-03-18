@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Weberse Infotech Private Limited' }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="{{ $description ?? 'Weberse Infotech builds premium websites, software systems, automation workflows, and digital products.' }}">
     <meta property="og:title" content="{{ $title ?? 'Weberse Infotech Private Limited' }}">
     <meta property="og:description" content="{{ $description ?? 'Innovating Intelligence. Building the Future.' }}">

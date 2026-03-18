@@ -5,6 +5,7 @@
     'nav' => [
         ['label' => 'Overview', 'route' => 'client.dashboard', 'active' => 'client.dashboard'],
         ['label' => 'Hosting', 'route' => 'client.hosting.index', 'active' => 'client.hosting.*'],
+        ['label' => 'Domains', 'route' => 'client.domains.index', 'active' => 'client.domains.*'],
         ['label' => 'Invoices', 'route' => 'client.invoices.index', 'active' => 'client.invoices.*'],
         ['label' => 'Support', 'route' => 'client.support.index', 'active' => 'client.support.*'],
         ['label' => 'Documents', 'route' => 'client.documents.index', 'active' => 'client.documents.*'],

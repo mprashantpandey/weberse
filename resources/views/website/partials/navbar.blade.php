@@ -70,6 +70,7 @@
             @if ($websiteFeatures['blog_enabled'])
                 <a class="nav-link {{ request()->routeIs('website.blog.*') ? 'nav-link-active' : '' }}" href="{{ route('website.blog.index') }}">Blog</a>
             @endif
+            <a class="nav-link {{ request()->routeIs('store.*') ? 'nav-link-active' : '' }}" href="{{ route('store.index') }}">Store</a>
             <a class="nav-link {{ request()->routeIs('website.contact') ? 'nav-link-active' : '' }}" href="{{ route('website.contact') }}">Contact</a>
         </nav>
 
@@ -225,6 +226,10 @@
                             <span>Blog</span>
                         </a>
                     @endif
+                    <a class="mobile-nav-link {{ request()->routeIs('store.*') ? 'mobile-nav-link-active' : '' }}" href="{{ route('store.index') }}" @click="open = false">
+                        <span class="mobile-nav-icon">@include('website.partials.icon', ['name' => 'cart', 'class' => 'h-4 w-4'])</span>
+                        <span>Store</span>
+                    </a>
                     <a class="mobile-nav-link {{ request()->routeIs('website.contact') ? 'mobile-nav-link-active' : '' }}" href="{{ route('website.contact') }}" @click="open = false">
                         <span class="mobile-nav-icon">@include('website.partials.icon', ['name' => 'mail', 'class' => 'h-4 w-4'])</span>
                         <span>Contact</span>
