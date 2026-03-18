@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\CmsController;
+use App\Http\Controllers\Admin\ClientManagementController;
 use App\Http\Controllers\Admin\CrmController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailController;
@@ -37,6 +38,13 @@ use Illuminate\Support\Facades\Route;
     Route::get('/cms/testimonials', [CmsController::class, 'testimonials'])->name('cms.testimonials.index');
     Route::post('/cms/testimonials', [CmsController::class, 'storeTestimonial'])->name('cms.testimonials.store');
     Route::patch('/cms/testimonials/{testimonial}', [CmsController::class, 'updateTestimonial'])->name('cms.testimonials.update');
+    Route::get('/clients', [ClientManagementController::class, 'index'])->name('clients.index');
+    Route::get('/clients/create', [ClientManagementController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [ClientManagementController::class, 'store'])->name('clients.store');
+    Route::get('/clients/{client}', [ClientManagementController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{client}/edit', [ClientManagementController::class, 'edit'])->name('clients.edit');
+    Route::patch('/clients/{client}', [ClientManagementController::class, 'update'])->name('clients.update');
+    Route::post('/clients/{client}/documents', [ClientManagementController::class, 'storeDocument'])->name('clients.documents.store');
     Route::get('/crm', [CrmController::class, 'index'])->name('crm.index');
     Route::get('/crm/leads', [CrmController::class, 'leads'])->name('crm.leads.index');
     Route::get('/crm/leads/create', [CrmController::class, 'create'])->name('crm.leads.create');

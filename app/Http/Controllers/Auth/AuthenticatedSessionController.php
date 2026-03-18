@@ -38,6 +38,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('client.dashboard');
         }
 
+        if ($request->user()->hasAnyRole(['hr', 'sales', 'support'])) {
+            return redirect()->route('employee.dashboard');
+        }
+
         return redirect()->route('admin.dashboard');
     }
 
@@ -63,6 +67,10 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->hasRole(UserRole::Client->value)) {
             return redirect()->route('client.dashboard');
+        }
+
+        if ($user->hasAnyRole([UserRole::HR->value, UserRole::Sales->value, UserRole::Support->value])) {
+            return redirect()->route('employee.dashboard');
         }
 
         return redirect()->route('admin.dashboard');
