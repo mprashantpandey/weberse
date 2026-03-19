@@ -98,7 +98,7 @@ class WorkspaceController extends Controller
 
         return view('employee.leaves.index', [
             'profile' => $profile,
-            'leaves' => $profile->leaveRequests()->latest('start_date')->get(),
+            'leaves' => $profile->leaveRequests()->with('reviewer')->latest('start_date')->get(),
         ]);
     }
 
@@ -127,7 +127,7 @@ class WorkspaceController extends Controller
 
         return view('employee.expenses.index', [
             'profile' => $profile,
-            'expenses' => $profile->expenseClaims()->latest('expense_date')->get(),
+            'expenses' => $profile->expenseClaims()->with('approver')->latest('expense_date')->get(),
         ]);
     }
 
@@ -161,7 +161,7 @@ class WorkspaceController extends Controller
 
         return view('employee.compensation.index', [
             'profile' => $profile,
-            'records' => $profile->compensationRecords()->latest('effective_from')->get(),
+            'records' => $profile->compensationRecords()->with('approver')->latest('effective_from')->get(),
         ]);
     }
 
@@ -171,7 +171,7 @@ class WorkspaceController extends Controller
 
         return view('employee.perks.index', [
             'profile' => $profile,
-            'perks' => $profile->perks()->latest()->get(),
+            'perks' => $profile->perks()->with('approver')->latest()->get(),
         ]);
     }
 

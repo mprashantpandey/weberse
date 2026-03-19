@@ -22,11 +22,13 @@
                         <div class="text-xl font-semibold text-brand-blue">{{ $perk->title }}</div>
                         <div class="mt-2 text-sm text-slate-500">{{ str($perk->perk_type)->replace('_', ' ')->title() }}</div>
                     </div>
-                    <span class="status-badge">{{ str($perk->status)->title() }}</span>
+                    <span class="status-badge">{{ str($perk->status)->replace('_', ' ')->title() }}</span>
                 </div>
                 <div class="mt-5 grid gap-3">
                     <div class="info-pair"><div class="info-label">Value</div><div class="info-value">{{ $perk->value ?: 'Not specified' }}</div></div>
                     <div class="info-pair"><div class="info-label">Active Window</div><div class="info-value">{{ optional($perk->starts_on)->format('d M Y') ?: '-' }} → {{ optional($perk->ends_on)->format('d M Y') ?: 'Open-ended' }}</div></div>
+                    <div class="info-pair"><div class="info-label">Approved By</div><div class="info-value">{{ $perk->approver?->name ?: 'Pending approval' }}</div></div>
+                    <div class="info-pair"><div class="info-label">Approval Note</div><div class="info-value">{{ $perk->review_note ?: 'No approval note yet' }}</div></div>
                     <div class="info-pair"><div class="info-label">Notes</div><div class="info-value">{{ $perk->notes ?: 'No additional notes' }}</div></div>
                 </div>
             </div>

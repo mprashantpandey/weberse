@@ -16,6 +16,7 @@ use App\Models\HRM\InterviewSchedule;
 use App\Models\HRM\JobApplication;
 use App\Models\HRM\JobOpening;
 use App\Models\HRM\LeaveRequest;
+use App\Services\HRM\ApprovalNotificationService;
 use App\Services\Mail\PlatformMailConfigurator;
 use App\Services\Settings\SiteSettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -40,8 +41,37 @@ class HrmController extends Controller
                 'screening' => JobApplication::query()->where('status', 'screening')->count(),
                 'employees' => EmployeeProfile::query()->count(),
                 'pending_leaves' => LeaveRequest::query()->where('status', 'pending')->count(),
+                'pending_expenses' => ExpenseClaim::query()->where('status', 'pending')->count(),
+                'pending_compensation' => CompensationRecord::query()->where('status', 'pending_approval')->count(),
+                'pending_perks' => EmployeePerk::query()->where('status', 'pending_approval')->count(),
                 'today_attendance' => AttendanceRecord::query()->whereDate('work_date', today())->count(),
             ],
+        ]);
+    }
+
+    public function approvals(): View
+    {
+        return view('admin.hrm.approvals', [
+            'pendingLeaves' => LeaveRequest::query()
+                ->with(['employeeProfile.user', 'employeeProfile.department'])
+                ->where('status', 'pending')
+                ->latest('start_date')
+                ->get(),
+            'pendingExpenses' => ExpenseClaim::query()
+                ->with(['employeeProfile.user'])
+                ->where('status', 'pending')
+                ->latest('expense_date')
+                ->get(),
+            'pendingCompensation' => CompensationRecord::query()
+                ->with(['employeeProfile.user', 'creator'])
+                ->where('status', 'pending_approval')
+                ->latest('effective_from')
+                ->get(),
+            'pendingPerks' => EmployeePerk::query()
+                ->with(['employeeProfile.user', 'creator'])
+                ->where('status', 'pending_approval')
+                ->latest()
+                ->get(),
         ]);
     }
 
@@ -108,7 +138,7 @@ class HrmController extends Controller
     {
         return view('admin.hrm.compensation', [
             'records' => CompensationRecord::query()
-                ->with('employeeProfile.user')
+                ->with(['employeeProfile.user', 'creator', 'approver'])
                 ->latest('effective_from')
                 ->get(),
             'employees' => EmployeeProfile::query()->with('user')->orderBy('employee_code')->get(),
@@ -130,7 +160,7 @@ class HrmController extends Controller
     {
         return view('admin.hrm.perks', [
             'perks' => EmployeePerk::query()
-                ->with('employeeProfile.user')
+                ->with(['employeeProfile.user', 'creator', 'approver'])
                 ->latest()
                 ->get(),
             'employees' => EmployeeProfile::query()->with('user')->orderBy('employee_code')->get(),
@@ -229,19 +259,23 @@ class HrmController extends Controller
         return back()->with('status', 'Application updated.');
     }
 
-    public function updateLeave(Request $request, LeaveRequest $leave): RedirectResponse
+    public function updateLeave(Request $request, LeaveRequest $leave, ApprovalNotificationService $notifications): RedirectResponse
     {
         $data = $request->validate([
             'status' => ['required', 'string', 'max:50'],
             'reason' => ['nullable', 'string'],
+            'review_note' => ['nullable', 'string'],
         ]);
 
         $leave->update([
             'status' => $data['status'],
             'reason' => $data['reason'] ?? $leave->reason,
-            'reviewed_by' => $request->user()?->id,
-            'reviewed_at' => now(),
+            'review_note' => $data['review_note'] ?? null,
+            'reviewed_by' => in_array($data['status'], ['approved', 'rejected'], true) ? $request->user()?->id : null,
+            'reviewed_at' => in_array($data['status'], ['approved', 'rejected'], true) ? now() : null,
         ]);
+
+        $notifications->sendLeaveStatusUpdate($leave->fresh(['employeeProfile.user']), $request->user());
 
         return back()->with('status', 'Leave request updated.');
     }
@@ -361,7 +395,7 @@ class HrmController extends Controller
         return back()->with('status', 'Interview updated.');
     }
 
-    public function storeCompensation(Request $request): RedirectResponse
+    public function storeCompensation(Request $request, ApprovalNotificationService $notifications): RedirectResponse
     {
         $data = $request->validate([
             'employee_profile_id' => ['required', 'exists:employee_profiles,id'],
@@ -373,14 +407,21 @@ class HrmController extends Controller
             'effective_to' => ['nullable', 'date', 'after_or_equal:effective_from'],
             'status' => ['required', 'string', 'max:50'],
             'notes' => ['nullable', 'string'],
+            'review_note' => ['nullable', 'string'],
         ]);
 
-        CompensationRecord::query()->create($data);
+        $record = CompensationRecord::query()->create([
+            ...$data,
+            'created_by' => $request->user()?->id,
+            ...$this->approvalFieldsForStatus($data['status'], $request->user()?->id, 'approved_by'),
+        ]);
+
+        $notifications->sendCompensationStatusUpdate($record->fresh(['employeeProfile.user']), $request->user());
 
         return back()->with('status', 'Compensation record added.');
     }
 
-    public function updateCompensation(Request $request, CompensationRecord $record): RedirectResponse
+    public function updateCompensation(Request $request, CompensationRecord $record, ApprovalNotificationService $notifications): RedirectResponse
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -391,14 +432,20 @@ class HrmController extends Controller
             'effective_to' => ['nullable', 'date', 'after_or_equal:effective_from'],
             'status' => ['required', 'string', 'max:50'],
             'notes' => ['nullable', 'string'],
+            'review_note' => ['nullable', 'string'],
         ]);
 
-        $record->update($data);
+        $record->update([
+            ...$data,
+            ...$this->approvalFieldsForStatus($data['status'], $request->user()?->id, 'approved_by', $record->approved_by),
+        ]);
+
+        $notifications->sendCompensationStatusUpdate($record->fresh(['employeeProfile.user']), $request->user());
 
         return back()->with('status', 'Compensation record updated.');
     }
 
-    public function storeExpense(Request $request): RedirectResponse
+    public function storeExpense(Request $request, ApprovalNotificationService $notifications): RedirectResponse
     {
         $data = $request->validate([
             'employee_profile_id' => ['required', 'exists:employee_profiles,id'],
@@ -409,19 +456,22 @@ class HrmController extends Controller
             'expense_date' => ['required', 'date'],
             'status' => ['required', 'string', 'max:50'],
             'notes' => ['nullable', 'string'],
+            'review_note' => ['nullable', 'string'],
         ]);
 
-        ExpenseClaim::query()->create([
+        $claim = ExpenseClaim::query()->create([
             ...$data,
             'submitted_by' => $request->user()?->id,
-            'approved_by' => in_array($data['status'], ['approved', 'reimbursed'], true) ? $request->user()?->id : null,
-            'processed_at' => in_array($data['status'], ['approved', 'reimbursed'], true) ? now() : null,
+            'approved_by' => in_array($data['status'], ['approved', 'reimbursed', 'rejected'], true) ? $request->user()?->id : null,
+            'processed_at' => in_array($data['status'], ['approved', 'reimbursed', 'rejected'], true) ? now() : null,
         ]);
+
+        $notifications->sendExpenseStatusUpdate($claim->fresh(['employeeProfile.user']), $request->user());
 
         return back()->with('status', 'Expense claim added.');
     }
 
-    public function updateExpense(Request $request, ExpenseClaim $claim): RedirectResponse
+    public function updateExpense(Request $request, ExpenseClaim $claim, ApprovalNotificationService $notifications): RedirectResponse
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -431,18 +481,21 @@ class HrmController extends Controller
             'expense_date' => ['required', 'date'],
             'status' => ['required', 'string', 'max:50'],
             'notes' => ['nullable', 'string'],
+            'review_note' => ['nullable', 'string'],
         ]);
 
         $claim->update([
             ...$data,
-            'approved_by' => in_array($data['status'], ['approved', 'reimbursed'], true) ? $request->user()?->id : null,
-            'processed_at' => in_array($data['status'], ['approved', 'reimbursed'], true) ? now() : null,
+            'approved_by' => in_array($data['status'], ['approved', 'reimbursed', 'rejected'], true) ? $request->user()?->id : null,
+            'processed_at' => in_array($data['status'], ['approved', 'reimbursed', 'rejected'], true) ? now() : null,
         ]);
+
+        $notifications->sendExpenseStatusUpdate($claim->fresh(['employeeProfile.user']), $request->user());
 
         return back()->with('status', 'Expense claim updated.');
     }
 
-    public function storePerk(Request $request): RedirectResponse
+    public function storePerk(Request $request, ApprovalNotificationService $notifications): RedirectResponse
     {
         $data = $request->validate([
             'employee_profile_id' => ['required', 'exists:employee_profiles,id'],
@@ -453,14 +506,21 @@ class HrmController extends Controller
             'starts_on' => ['nullable', 'date'],
             'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on'],
             'notes' => ['nullable', 'string'],
+            'review_note' => ['nullable', 'string'],
         ]);
 
-        EmployeePerk::query()->create($data);
+        $perk = EmployeePerk::query()->create([
+            ...$data,
+            'created_by' => $request->user()?->id,
+            ...$this->approvalFieldsForStatus($data['status'], $request->user()?->id, 'approved_by'),
+        ]);
+
+        $notifications->sendPerkStatusUpdate($perk->fresh(['employeeProfile.user']), $request->user());
 
         return back()->with('status', 'Perk added.');
     }
 
-    public function updatePerk(Request $request, EmployeePerk $perk): RedirectResponse
+    public function updatePerk(Request $request, EmployeePerk $perk, ApprovalNotificationService $notifications): RedirectResponse
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -470,11 +530,28 @@ class HrmController extends Controller
             'starts_on' => ['nullable', 'date'],
             'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on'],
             'notes' => ['nullable', 'string'],
+            'review_note' => ['nullable', 'string'],
         ]);
 
-        $perk->update($data);
+        $perk->update([
+            ...$data,
+            ...$this->approvalFieldsForStatus($data['status'], $request->user()?->id, 'approved_by', $perk->approved_by),
+        ]);
+
+        $notifications->sendPerkStatusUpdate($perk->fresh(['employeeProfile.user']), $request->user());
 
         return back()->with('status', 'Perk updated.');
+    }
+
+    private function approvalFieldsForStatus(string $status, ?int $userId, string $approverColumn, ?int $existingApproverId = null): array
+    {
+        $approvedStates = ['approved', 'active', 'reimbursed'];
+        $decisionStates = [...$approvedStates, 'rejected'];
+
+        return [
+            $approverColumn => in_array($status, $decisionStates, true) ? ($userId ?? $existingApproverId) : null,
+            'approved_at' => in_array($status, $approvedStates, true) ? now() : null,
+        ];
     }
 
     private function mapJobData(array $data, ?JobOpening $jobOpening = null): array

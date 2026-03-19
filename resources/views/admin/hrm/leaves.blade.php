@@ -15,6 +15,7 @@
 @section('content')
     <div class="dashboard-subnav">
         <a href="{{ route('admin.hrm.index') }}" class="dashboard-subnav-link">Overview</a>
+        <a href="{{ route('admin.hrm.approvals.index') }}" class="dashboard-subnav-link">Approvals</a>
         <a href="{{ route('admin.hrm.employees.index') }}" class="dashboard-subnav-link">Employees</a>
         <a href="{{ route('admin.hrm.leaves.index') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Leaves</a>
         <a href="{{ route('admin.hrm.jobs.index') }}" class="dashboard-subnav-link">Jobs</a>
@@ -36,6 +37,7 @@
                     <th>Dates</th>
                     <th>Status</th>
                     <th>Reviewed By</th>
+                    <th>Review Note</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -48,6 +50,7 @@
                         <td>{{ $leave->start_date->format('d M Y') }} → {{ $leave->end_date->format('d M Y') }}</td>
                         <td><span class="status-badge">{{ str($leave->status)->title() }}</span></td>
                         <td>{{ $leave->reviewer?->name ?: '-' }}</td>
+                        <td>{{ $leave->review_note ?: '—' }}</td>
                         <td>
                             <form method="POST" action="{{ route('admin.hrm.leaves.update', $leave) }}" class="flex flex-wrap items-center gap-2">
                                 @csrf
@@ -58,12 +61,13 @@
                                     @endforeach
                                 </select>
                                 <input class="input !py-2 !px-3 !text-xs" name="reason" value="{{ $leave->reason }}" placeholder="Reason / note">
+                                <input class="input !py-2 !px-3 !text-xs" name="review_note" value="{{ $leave->review_note }}" placeholder="Approval note">
                                 <button class="btn-dark !px-4 !py-2 text-xs">Save</button>
                             </form>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="text-sm text-slate-500">No leave requests found.</td></tr>
+                    <tr><td colspan="8" class="text-sm text-slate-500">No leave requests found.</td></tr>
                 @endforelse
             </tbody>
         </table>

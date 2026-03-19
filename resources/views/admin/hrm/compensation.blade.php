@@ -19,6 +19,7 @@
 
     <div class="dashboard-subnav">
         <a href="{{ route('admin.hrm.index') }}" class="dashboard-subnav-link">Overview</a>
+        <a href="{{ route('admin.hrm.approvals.index') }}" class="dashboard-subnav-link">Approvals</a>
         <a href="{{ route('admin.hrm.employees.index') }}" class="dashboard-subnav-link">Employees</a>
         <a href="{{ route('admin.hrm.jobs.index') }}" class="dashboard-subnav-link">Jobs</a>
         <a href="{{ route('admin.hrm.applications.index') }}" class="dashboard-subnav-link">Applications</a>
@@ -45,6 +46,7 @@
                         <th>Amount</th>
                         <th>Effective</th>
                         <th>Status</th>
+                        <th>Approval</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -56,6 +58,10 @@
                             <td>{{ $record->currency }} {{ number_format((float) $record->amount, 2) }}</td>
                             <td>{{ $record->effective_from?->format('d M Y') }}</td>
                             <td><span class="status-badge">{{ str($record->status)->replace('_', ' ')->title() }}</span></td>
+                            <td>
+                                <div>{{ $record->approver?->name ?: ($record->creator?->name ? 'Created by '.$record->creator->name : '—') }}</div>
+                                <div class="mt-1 text-xs text-slate-500">{{ $record->review_note ?: 'No approval note' }}</div>
+                            </td>
                             <td class="text-right"><button type="button" class="btn-dark px-4 py-2 text-xs" @click="activeEdit = {{ $record->id }}">Edit</button></td>
                         </tr>
                     @endforeach
@@ -90,11 +96,12 @@
                     <input class="input" name="currency" value="INR" required>
                     <input class="input" type="date" name="effective_from" required>
                     <select class="input" name="status">
-                        @foreach (['active', 'scheduled', 'closed'] as $status)
-                            <option value="{{ $status }}">{{ str($status)->title() }}</option>
+                        @foreach (['pending_approval', 'approved', 'active', 'scheduled', 'closed', 'rejected'] as $status)
+                            <option value="{{ $status }}">{{ str($status)->replace('_', ' ')->title() }}</option>
                         @endforeach
                     </select>
                     <textarea class="input min-h-28 md:col-span-2" name="notes" placeholder="Notes"></textarea>
+                    <textarea class="input min-h-28 md:col-span-2" name="review_note" placeholder="Approval note"></textarea>
                     <div class="md:col-span-2 flex gap-3">
                         <button class="btn-primary">Save Record</button>
                         <button type="button" class="btn-dark" @click="createOpen = false">Cancel</button>
@@ -123,11 +130,12 @@
                         <input class="input" name="currency" value="{{ $record->currency }}" required>
                         <input class="input" type="date" name="effective_from" value="{{ optional($record->effective_from)->format('Y-m-d') }}" required>
                         <select class="input" name="status">
-                            @foreach (['active', 'scheduled', 'closed'] as $status)
-                                <option value="{{ $status }}" @selected($record->status === $status)>{{ str($status)->title() }}</option>
+                            @foreach (['pending_approval', 'approved', 'active', 'scheduled', 'closed', 'rejected'] as $status)
+                                <option value="{{ $status }}" @selected($record->status === $status)>{{ str($status)->replace('_', ' ')->title() }}</option>
                             @endforeach
                         </select>
                         <textarea class="input min-h-28 md:col-span-2" name="notes">{{ $record->notes }}</textarea>
+                        <textarea class="input min-h-28 md:col-span-2" name="review_note">{{ $record->review_note }}</textarea>
                         <div class="md:col-span-2 flex gap-3">
                             <button class="btn-primary">Save Changes</button>
                             <button type="button" class="btn-dark" @click="activeEdit = null">Cancel</button>

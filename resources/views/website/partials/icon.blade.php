@@ -9,6 +9,8 @@
         'arrow' => 'arrow-right',
         'mail' => 'mail',
         'phone' => 'phone',
+        'whatsapp' => 'messages-square',
+        'teams' => 'video',
         'menu' => 'menu',
         'close' => 'x',
         'chevron' => 'chevron-down',

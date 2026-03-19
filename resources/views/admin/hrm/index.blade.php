@@ -15,6 +15,7 @@
 @section('content')
     <div class="dashboard-subnav">
         <a href="{{ route('admin.hrm.index') }}" class="dashboard-subnav-link dashboard-subnav-link-active">Overview</a>
+        <a href="{{ route('admin.hrm.approvals.index') }}" class="dashboard-subnav-link">Approvals</a>
         <a href="{{ route('admin.hrm.employees.index') }}" class="dashboard-subnav-link">Employees</a>
         <a href="{{ route('admin.hrm.leaves.index') }}" class="dashboard-subnav-link">Leaves</a>
         <a href="{{ route('admin.hrm.jobs.index') }}" class="dashboard-subnav-link">Jobs</a>
@@ -48,6 +49,18 @@
             <div class="metric-value">{{ $summary['pending_leaves'] }}</div>
         </div>
         <div class="metric-card">
+            <div class="metric-label">Pending Expenses</div>
+            <div class="metric-value">{{ $summary['pending_expenses'] }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Pending Compensation</div>
+            <div class="metric-value">{{ $summary['pending_compensation'] }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Pending Perks</div>
+            <div class="metric-value">{{ $summary['pending_perks'] }}</div>
+        </div>
+        <div class="metric-card">
             <div class="metric-label">Today's Attendance</div>
             <div class="metric-value">{{ $summary['today_attendance'] }}</div>
         </div>
@@ -69,7 +82,10 @@
                 @endforeach
             </div>
             <div class="mt-5">
-                <a href="{{ route('admin.hrm.jobs.index') }}" class="btn-dark">Manage Job Openings</a>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{{ route('admin.hrm.jobs.index') }}" class="btn-dark">Manage Job Openings</a>
+                    <a href="{{ route('admin.hrm.approvals.index') }}" class="btn-primary">Review Approvals</a>
+                </div>
             </div>
         </div>
 

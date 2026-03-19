@@ -208,7 +208,7 @@ class EmailController extends Controller
     {
         $sent = $service->sendCampaign($campaign, $request->user());
 
-        return back()->with('status', "Campaign sent to {$sent} subscribers.");
+        return back()->with('status', "Campaign queued for {$sent} subscribers.");
     }
 
     public function sendSingle(Request $request, EmailCenterService $service): RedirectResponse
@@ -235,7 +235,7 @@ class EmailController extends Controller
             meta: ['type' => 'single_send'],
         );
 
-        return back()->with('status', $ok ? 'Email sent successfully.' : 'Email could not be sent. Check SMTP settings.');
+        return back()->with('status', $ok ? 'Email queued successfully.' : 'Email could not be queued. Check SMTP settings.');
     }
 
     private function uniqueSlug(string $name): string

@@ -19,6 +19,7 @@
 
     <div class="dashboard-subnav">
         <a href="{{ route('admin.hrm.index') }}" class="dashboard-subnav-link">Overview</a>
+        <a href="{{ route('admin.hrm.approvals.index') }}" class="dashboard-subnav-link">Approvals</a>
         <a href="{{ route('admin.hrm.employees.index') }}" class="dashboard-subnav-link">Employees</a>
         <a href="{{ route('admin.hrm.jobs.index') }}" class="dashboard-subnav-link">Jobs</a>
         <a href="{{ route('admin.hrm.applications.index') }}" class="dashboard-subnav-link">Applications</a>
@@ -44,6 +45,7 @@
                         <th>Perk</th>
                         <th>Value</th>
                         <th>Status</th>
+                        <th>Approval</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -54,6 +56,10 @@
                             <td>{{ $perk->title }} <div class="mt-1 text-xs text-slate-500">{{ str($perk->perk_type)->replace('_', ' ')->title() }}</div></td>
                             <td>{{ $perk->value ?: '—' }}</td>
                             <td><span class="status-badge">{{ str($perk->status)->replace('_', ' ')->title() }}</span></td>
+                            <td>
+                                <div>{{ $perk->approver?->name ?: ($perk->creator?->name ? 'Created by '.$perk->creator->name : '—') }}</div>
+                                <div class="mt-1 text-xs text-slate-500">{{ $perk->review_note ?: 'No approval note' }}</div>
+                            </td>
                             <td class="text-right"><button type="button" class="btn-dark px-4 py-2 text-xs" @click="activeEdit = {{ $perk->id }}">Edit</button></td>
                         </tr>
                     @endforeach
@@ -82,11 +88,12 @@
                     <input class="input" name="perk_type" placeholder="Benefit type" required>
                     <input class="input" name="value" placeholder="Family cover">
                     <select class="input" name="status">
-                        @foreach (['active', 'inactive', 'planned'] as $status)
-                            <option value="{{ $status }}">{{ str($status)->title() }}</option>
+                        @foreach (['planned', 'pending_approval', 'active', 'inactive', 'rejected'] as $status)
+                            <option value="{{ $status }}">{{ str($status)->replace('_', ' ')->title() }}</option>
                         @endforeach
                     </select>
                     <textarea class="input min-h-28 md:col-span-2" name="notes" placeholder="Notes"></textarea>
+                    <textarea class="input min-h-28 md:col-span-2" name="review_note" placeholder="Approval note"></textarea>
                     <div class="md:col-span-2 flex gap-3">
                         <button class="btn-primary">Save Perk</button>
                         <button type="button" class="btn-dark" @click="createOpen = false">Cancel</button>
@@ -109,11 +116,12 @@
                         <input class="input" name="perk_type" value="{{ $perk->perk_type }}" required>
                         <input class="input" name="value" value="{{ $perk->value }}">
                         <select class="input" name="status">
-                            @foreach (['active', 'inactive', 'planned'] as $status)
-                                <option value="{{ $status }}" @selected($perk->status === $status)>{{ str($status)->title() }}</option>
+                            @foreach (['planned', 'pending_approval', 'active', 'inactive', 'rejected'] as $status)
+                                <option value="{{ $status }}" @selected($perk->status === $status)>{{ str($status)->replace('_', ' ')->title() }}</option>
                             @endforeach
                         </select>
                         <textarea class="input min-h-28 md:col-span-2" name="notes">{{ $perk->notes }}</textarea>
+                        <textarea class="input min-h-28 md:col-span-2" name="review_note">{{ $perk->review_note }}</textarea>
                         <div class="md:col-span-2 flex gap-3">
                             <button class="btn-primary">Save Changes</button>
                             <button type="button" class="btn-dark" @click="activeEdit = null">Cancel</button>

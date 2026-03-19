@@ -2,6 +2,7 @@
 
 namespace App\Services\Communication;
 
+use App\Jobs\SendPlatformEmailJob;
 use App\Mail\DynamicHtmlMail;
 use App\Models\Communication\EmailTemplate;
 use App\Models\Communication\NewsletterCampaign;
@@ -9,10 +10,6 @@ use App\Models\Communication\NewsletterSubscriber;
 use App\Models\Communication\OutboundEmail;
 use App\Models\User;
 use App\Services\Mail\PlatformMailConfigurator;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Throwable;
-
 class EmailCenterService
 {
     public function __construct(
@@ -48,43 +45,24 @@ class EmailCenterService
             'recipient_email' => $recipientEmail,
             'subject' => $subject,
             'body' => $body,
-            'status' => 'pending',
+            'status' => 'queued',
             'meta' => $meta ?: null,
         ]);
 
-        try {
-            if (! $this->mailConfigurator->apply($scope)) {
-                $log->update([
-                    'status' => 'failed',
-                    'error_message' => $scope === 'hr'
-                        ? 'HR email settings are incomplete.'
-                        : 'General email settings are incomplete.',
-                ]);
-
-                return false;
-            }
-
-            Mail::to($recipientEmail, $recipientName)->send(new DynamicHtmlMail($subject, nl2br($body)));
-
-            $log->update([
-                'status' => 'sent',
-                'sent_at' => now(),
-            ]);
-
-            return true;
-        } catch (Throwable $exception) {
+        if (! $this->mailConfigurator->apply($scope)) {
             $log->update([
                 'status' => 'failed',
-                'error_message' => $exception->getMessage(),
-            ]);
-
-            Log::warning('Email delivery failed.', [
-                'recipient' => $recipientEmail,
-                'message' => $exception->getMessage(),
+                'error_message' => $scope === 'hr'
+                    ? 'HR email settings are incomplete.'
+                    : 'General email settings are incomplete.',
             ]);
 
             return false;
         }
+
+        SendPlatformEmailJob::dispatch($log->id, $scope);
+
+        return true;
     }
 
     public function sendTemplate(
@@ -151,8 +129,8 @@ class EmailCenterService
         }
 
         $campaign->update([
-            'status' => 'sent',
-            'sent_at' => now(),
+            'status' => $sent > 0 ? 'queued' : 'draft',
+            'sent_at' => $sent > 0 ? now() : null,
             'sent_count' => $sent,
         ]);
 

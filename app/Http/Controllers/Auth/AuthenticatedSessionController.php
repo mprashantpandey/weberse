@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthenticatedSessionController extends Controller
@@ -95,10 +96,29 @@ class AuthenticatedSessionController extends Controller
             throw new NotFoundHttpException();
         }
 
+        $roleExists = Role::query()
+            ->where('name', $userRole->value)
+            ->where('guard_name', 'web')
+            ->exists();
+
+        if (! $roleExists) {
+            throw ValidationException::withMessages([
+                'email' => 'Quick login is unavailable because demo roles are not seeded on this environment.',
+            ]);
+        }
+
         $user = User::query()
-            ->role($userRole->value)
+            ->whereHas('roles', function ($query) use ($userRole) {
+                $query->where('name', $userRole->value)->where('guard_name', 'web');
+            })
             ->orderBy('id')
-            ->firstOrFail();
+            ->first();
+
+        if (! $user) {
+            throw ValidationException::withMessages([
+                'email' => 'Quick login is unavailable because no demo user exists for this role.',
+            ]);
+        }
 
         Auth::login($user, true);
 
@@ -134,7 +154,7 @@ class AuthenticatedSessionController extends Controller
 
     protected function ensureQuickLoginIsAllowed(): void
     {
-        if (! config('platform.features.quick_login')) {
+        if (! config('platform.features.quick_login') || ! app()->environment('local')) {
             throw new NotFoundHttpException();
         }
     }

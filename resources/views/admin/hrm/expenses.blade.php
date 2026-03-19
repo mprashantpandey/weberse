@@ -19,6 +19,7 @@
 
     <div class="dashboard-subnav">
         <a href="{{ route('admin.hrm.index') }}" class="dashboard-subnav-link">Overview</a>
+        <a href="{{ route('admin.hrm.approvals.index') }}" class="dashboard-subnav-link">Approvals</a>
         <a href="{{ route('admin.hrm.employees.index') }}" class="dashboard-subnav-link">Employees</a>
         <a href="{{ route('admin.hrm.jobs.index') }}" class="dashboard-subnav-link">Jobs</a>
         <a href="{{ route('admin.hrm.applications.index') }}" class="dashboard-subnav-link">Applications</a>
@@ -45,6 +46,7 @@
                         <th>Amount</th>
                         <th>Date</th>
                         <th>Status</th>
+                        <th>Reviewed By</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -56,6 +58,10 @@
                             <td>{{ $claim->currency }} {{ number_format((float) $claim->amount, 2) }}</td>
                             <td>{{ $claim->expense_date?->format('d M Y') }}</td>
                             <td><span class="status-badge">{{ str($claim->status)->replace('_', ' ')->title() }}</span></td>
+                            <td>
+                                <div>{{ $claim->approver?->name ?: '—' }}</div>
+                                <div class="mt-1 text-xs text-slate-500">{{ $claim->review_note ?: 'No review note' }}</div>
+                            </td>
                             <td class="text-right"><button type="button" class="btn-dark px-4 py-2 text-xs" @click="activeEdit = {{ $claim->id }}">Edit</button></td>
                         </tr>
                     @endforeach
@@ -91,6 +97,7 @@
                         @endforeach
                     </select>
                     <textarea class="input min-h-28 md:col-span-2" name="notes" placeholder="Notes"></textarea>
+                    <textarea class="input min-h-28 md:col-span-2" name="review_note" placeholder="Review note"></textarea>
                     <div class="md:col-span-2 flex gap-3">
                         <button class="btn-primary">Save Claim</button>
                         <button type="button" class="btn-dark" @click="createOpen = false">Cancel</button>
@@ -120,6 +127,7 @@
                             @endforeach
                         </select>
                         <textarea class="input min-h-28 md:col-span-2" name="notes">{{ $claim->notes }}</textarea>
+                        <textarea class="input min-h-28 md:col-span-2" name="review_note">{{ $claim->review_note }}</textarea>
                         <div class="md:col-span-2 flex gap-3">
                             <button class="btn-primary">Save Changes</button>
                             <button type="button" class="btn-dark" @click="activeEdit = null">Cancel</button>

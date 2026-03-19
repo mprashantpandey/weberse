@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Communication\OutboundEmail;
 use App\Services\WHMCS\WhmcsService;
 use App\Services\Settings\SiteSettingsService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,6 +23,31 @@ class SettingsController extends Controller
             'integrationSettings' => $settings->getIntegrationSettings(),
             'whmcsSettings' => $settings->getWhmcsSettings(),
             'storePaymentSettings' => $settings->getStorePaymentSettings(),
+        ]);
+    }
+
+    public function health(SiteSettingsService $settings): View
+    {
+        $health = $settings->getSystemHealth();
+        $schedulerLastRanAt = ! empty($health['scheduler_last_ran_at']) ? Carbon::parse($health['scheduler_last_ran_at']) : null;
+        $queueLastStartedAt = ! empty($health['queue_last_started_at']) ? Carbon::parse($health['queue_last_started_at']) : null;
+        $queueLastFinishedAt = ! empty($health['queue_last_finished_at']) ? Carbon::parse($health['queue_last_finished_at']) : null;
+
+        $schedulerHealthy = $schedulerLastRanAt?->gt(now()->subMinutes(3)) ?? false;
+        $queueHealthy = $queueLastFinishedAt?->gt(now()->subMinutes(5)) ?? false;
+
+        return view('admin.settings.health', [
+            'cronCommand' => '* * * * * php '.base_path('artisan').' schedule:run >> /dev/null 2>&1',
+            'schedulerLastRanAt' => $schedulerLastRanAt,
+            'queueLastStartedAt' => $queueLastStartedAt,
+            'queueLastFinishedAt' => $queueLastFinishedAt,
+            'schedulerHealthy' => $schedulerHealthy,
+            'queueHealthy' => $queueHealthy,
+            'jobsPending' => DB::table('jobs')->count(),
+            'jobsReserved' => DB::table('jobs')->whereNotNull('reserved_at')->count(),
+            'failedJobs' => DB::table('failed_jobs')->count(),
+            'failedEmails' => OutboundEmail::query()->where('status', 'failed')->count(),
+            'queuedEmails' => OutboundEmail::query()->where('status', 'queued')->count(),
         ]);
     }
 

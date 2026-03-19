@@ -22,7 +22,7 @@
             <div class="panel-title">Expense History</div>
             <table class="dashboard-table mt-6">
                 <thead>
-                    <tr><th>Title</th><th>Category</th><th>Amount</th><th>Date</th><th>Status</th></tr>
+                    <tr><th>Title</th><th>Category</th><th>Amount</th><th>Date</th><th>Status</th><th>Review</th></tr>
                 </thead>
                 <tbody>
                     @forelse ($expenses as $expense)
@@ -32,9 +32,13 @@
                             <td>{{ $expense->currency }} {{ $expense->amount }}</td>
                             <td>{{ $expense->expense_date->format('d M Y') }}</td>
                             <td><span class="status-badge">{{ str($expense->status)->title() }}</span></td>
+                            <td>
+                                <div>{{ $expense->approver?->name ?: 'Pending review' }}</div>
+                                <div class="mt-1 text-xs text-slate-500">{{ $expense->review_note ?: 'No review note yet' }}</div>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-sm text-slate-500">No expense claims yet.</td></tr>
+                        <tr><td colspan="6" class="text-sm text-slate-500">No expense claims yet.</td></tr>
                     @endforelse
                 </tbody>
             </table>

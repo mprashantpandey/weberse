@@ -81,6 +81,13 @@
                     </div>
                     <div class="status-badge">Active</div>
                 </button>
+                <a href="{{ route('admin.settings.health') }}" class="settings-nav-item">
+                    <div>
+                        <div class="font-semibold text-slate-800">System Health</div>
+                        <div class="mt-1 text-slate-500">Cron command, scheduler heartbeat, queue status, and failed job visibility.</div>
+                    </div>
+                    <div class="status-badge">Open</div>
+                </a>
                 <button type="button" class="settings-nav-item" :class="activeSection === 'store-payments' ? 'settings-nav-item-active' : ''" @click="jumpTo('store-payments')">
                     <div>
                         <div class="font-semibold text-slate-800">Store Payments</div>

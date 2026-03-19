@@ -23,7 +23,7 @@
             <div class="panel-subtitle">All leave requests tied to your employee profile.</div>
             <table class="dashboard-table mt-6">
                 <thead>
-                    <tr><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Reason</th></tr>
+                    <tr><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Request</th><th>Review</th></tr>
                 </thead>
                 <tbody>
                     @forelse ($leaves as $leave)
@@ -33,9 +33,13 @@
                             <td>{{ $leave->end_date->format('d M Y') }}</td>
                             <td><span class="status-badge">{{ str($leave->status)->title() }}</span></td>
                             <td>{{ $leave->reason ?: '-' }}</td>
+                            <td>
+                                <div>{{ $leave->reviewer?->name ?: 'Pending review' }}</div>
+                                <div class="mt-1 text-xs text-slate-500">{{ $leave->review_note ?: 'No review note yet' }}</div>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-sm text-slate-500">No leave requests yet.</td></tr>
+                        <tr><td colspan="6" class="text-sm text-slate-500">No leave requests yet.</td></tr>
                     @endforelse
                 </tbody>
             </table>

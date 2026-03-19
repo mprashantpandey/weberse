@@ -150,14 +150,16 @@
     @endif
     <link rel="icon" href="{{ $mediaAssetUrl($companyProfile['favicon'] ?? null, 'favicon.ico') }}">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ route('seo.sitemap') }}">
-    @php($integrationSettings = app(\App\Services\Settings\SiteSettingsService::class)->getIntegrationSettings())
+    @php
+        $integrationSettings = app(\App\Services\Settings\SiteSettingsService::class)->getIntegrationSettings();
+    @endphp
     @if (!empty($integrationSettings['google_analytics_id']))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $integrationSettings['google_analytics_id'] }}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '{{ $integrationSettings['google_analytics_id'] }}');
+            gtag('config', '{{ $integrationSettings["google_analytics_id"] }}');
         </script>
     @endif
     @if (!empty($integrationSettings['google_tag_manager_id']))
@@ -166,7 +168,7 @@
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','{{ $integrationSettings['google_tag_manager_id'] }}');
+            })(window,document,'script','dataLayer','{{ $integrationSettings["google_tag_manager_id"] }}');
         </script>
     @endif
     @if (!empty($integrationSettings['head_snippet']))
@@ -199,6 +201,96 @@
     </main>
     @include('website.partials.footer')
     @include('website.partials.marketing-popups')
+    @php
+        $quickPhone = (string) ($companyProfile['phone'] ?? config('platform.company.phone', ''));
+        $quickEmail = (string) ($companyProfile['email'] ?? config('platform.company.email', ''));
+        $quickWhatsapp = (string) ($companyProfile['whatsapp'] ?? config('platform.company.whatsapp', $quickPhone));
+        $quickWhatsappDigits = preg_replace('/\D+/', '', $quickWhatsapp) ?: preg_replace('/\D+/', '', $quickPhone);
+        $quickCallDigits = preg_replace('/\D+/', '', $quickPhone);
+        $teamsLink = (string) ($companyProfile['teams_link'] ?? '');
+    @endphp
+    <div
+        x-data="{ open: false }"
+        x-on:keydown.escape.window="open = false"
+        class="quick-actions-widget"
+    >
+        <button
+            type="button"
+            class="quick-actions-fab"
+            aria-label="Open quick contact options"
+            x-on:click="open = !open"
+            x-bind:aria-expanded="open.toString()"
+        >
+            <span class="quick-actions-fab-ping" aria-hidden="true"></span>
+            <span class="quick-actions-fab-icon" x-show="!open" x-cloak>
+                @include('website.partials.icon', ['name' => 'messages-square', 'class' => 'h-5 w-5'])
+            </span>
+            <span class="quick-actions-fab-icon" x-show="open" x-cloak>
+                @include('website.partials.icon', ['name' => 'close', 'class' => 'h-5 w-5'])
+            </span>
+        </button>
+
+        <div class="quick-actions-panel" x-show="open" x-cloak x-transition.origin.bottom.left>
+            <div class="quick-actions-title">Need Help Fast?</div>
+            <p class="quick-actions-subtitle">Pick your preferred channel and our team will respond quickly.</p>
+            <div class="quick-actions-grid">
+                <a
+                    class="quick-actions-item"
+                    href="{{ !empty($quickWhatsappDigits ?? null) ? 'https://wa.me/'.$quickWhatsappDigits : '#' }}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <span class="quick-actions-item-icon">
+                        @include('website.partials.icon', ['name' => 'whatsapp', 'class' => 'h-4 w-4'])
+                    </span>
+                    <span class="quick-actions-item-label">WhatsApp Chat</span>
+                </a>
+
+                <a class="quick-actions-item" href="{{ !empty($quickCallDigits ?? null) ? 'tel:+'.$quickCallDigits : '#' }}">
+                    <span class="quick-actions-item-icon">
+                        @include('website.partials.icon', ['name' => 'phone', 'class' => 'h-4 w-4'])
+                    </span>
+                    <span class="quick-actions-item-label">Call Us</span>
+                </a>
+
+                @if (!empty($teamsLink ?? null))
+                    <a class="quick-actions-item" href="{{ $teamsLink }}" target="_blank" rel="noopener">
+                        <span class="quick-actions-item-icon">
+                            @include('website.partials.icon', ['name' => 'teams', 'class' => 'h-4 w-4'])
+                        </span>
+                        <span class="quick-actions-item-label">Teams Meeting</span>
+                    </a>
+                @else
+                    <a
+                        href="{{ route('website.contact') }}"
+                        class="quick-actions-item"
+                        data-lead-popup
+                        data-lead-title="Schedule a Teams Call"
+                        data-lead-source="quick_actions_teams"
+                        data-lead-context="Quick actions widget"
+                        data-lead-submit="Request Teams Call"
+                    >
+                        <span class="quick-actions-item-icon">
+                            @include('website.partials.icon', ['name' => 'teams', 'class' => 'h-4 w-4'])
+                        </span>
+                        <span class="quick-actions-item-label">Teams Meeting</span>
+                    </a>
+                @endif
+
+                <a
+                    class="quick-actions-item"
+                    href="{{ !empty($quickEmail ?? null) ? 'mailto:'.$quickEmail.'?subject='.rawurlencode('Project Inquiry').'&body='.rawurlencode('Hi Weberse, I would like to discuss a project.') : '#' }}"
+                >
+                    <span class="quick-actions-item-icon">
+                        @include('website.partials.icon', ['name' => 'mail', 'class' => 'h-4 w-4'])
+                    </span>
+                    <span class="quick-actions-item-label">Email Us</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="quick-actions-backdrop" x-show="open" x-cloak x-on:click="open = false"></div>
+    </div>
     @if (!empty($integrationSettings['footer_snippet']))
         {!! $integrationSettings['footer_snippet'] !!}
     @endif
@@ -208,7 +300,7 @@
             (function(){
             var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
             s1.async=true;
-            s1.src='https://embed.tawk.to/{{ $integrationSettings['tawk_property_id'] }}/{{ $integrationSettings['tawk_widget_id'] }}';
+            s1.src='https://embed.tawk.to/{{ $integrationSettings["tawk_property_id"] }}/{{ $integrationSettings["tawk_widget_id"] }}';
             s1.charset='UTF-8';
             s1.setAttribute('crossorigin','*');
             s0.parentNode.insertBefore(s1,s0);

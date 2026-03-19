@@ -2,7 +2,7 @@
 
 return [
     'features' => [
-        'quick_login' => env('QUICK_LOGIN_ENABLED', true),
+        'quick_login' => env('QUICK_LOGIN_ENABLED', false),
     ],
 
     'company' => [

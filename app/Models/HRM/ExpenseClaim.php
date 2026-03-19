@@ -20,6 +20,7 @@ class ExpenseClaim extends Model
         'status',
         'receipt_path',
         'notes',
+        'review_note',
         'processed_at',
     ];
 

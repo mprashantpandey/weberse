@@ -460,6 +460,123 @@
         margin: 2.5rem 0;
     }
 
+    /* ------------------------------------------------------------------
+       Website quick actions widget (bottom-left)
+       ------------------------------------------------------------------ */
+    [x-cloak] { display: none !important; }
+
+    .quick-actions-widget {
+        position: fixed;
+        left: 18px;
+        bottom: 18px;
+        z-index: 90;
+        pointer-events: none;
+    }
+
+    .quick-actions-fab {
+        pointer-events: auto;
+        position: relative;
+        z-index: 3;
+        @apply relative inline-flex h-14 w-14 items-center justify-center rounded-full border text-white transition duration-300;
+        background: linear-gradient(135deg, #73b655, #4f9440);
+        border-color: rgba(255,255,255,0.22);
+        box-shadow: 0 18px 44px rgba(58, 125, 44, 0.36);
+        transform: translateZ(0);
+    }
+
+    .quick-actions-fab:hover {
+        transform: translateY(-2px) scale(1.02);
+        border-color: rgba(255,255,255,0.42);
+        box-shadow: 0 0 0 1px rgba(115,182,85,0.20), 0 24px 54px rgba(58, 125, 44, 0.4);
+    }
+
+    .quick-actions-fab-icon {
+        @apply inline-flex items-center justify-center;
+        z-index: 2;
+    }
+
+    .quick-actions-fab-ping {
+        position: absolute;
+        inset: -8px;
+        border-radius: 9999px;
+        border: 2px solid rgba(115,182,85,0.35);
+        animation: quickActionsPing 2.2s ease-out infinite;
+    }
+
+    .quick-actions-panel {
+        pointer-events: auto;
+        position: relative;
+        z-index: 3;
+        width: 280px;
+        max-width: calc(100vw - 36px);
+        @apply mb-3 overflow-hidden rounded-[18px] border bg-white p-4 text-slate-900 shadow-[0_22px_58px_rgba(13,47,80,0.16)];
+        border-color: rgba(13,47,80,0.08);
+    }
+
+    .quick-actions-title {
+        @apply text-base font-bold text-brand-blue;
+    }
+
+    .quick-actions-subtitle {
+        @apply mt-1 text-xs text-slate-500;
+    }
+
+    .quick-actions-grid {
+        @apply mt-3 grid grid-cols-1 gap-2;
+    }
+
+    .quick-actions-item {
+        @apply flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold text-slate-700 transition duration-300;
+        border-color: rgba(13,47,80,0.10);
+        background: #f8fbfd;
+    }
+
+    .quick-actions-item:hover {
+        transform: translateY(-1px);
+        border-color: rgba(115,182,85,0.28);
+        box-shadow: 0 14px 30px rgba(13,47,80,0.10);
+        background: rgba(115,182,85,0.10);
+        color: #0d2f50;
+    }
+
+    .quick-actions-item-icon {
+        @apply inline-flex h-8 w-8 items-center justify-center rounded-xl;
+        background: rgba(13,47,80,0.06);
+        color: #0d2f50;
+    }
+
+    .quick-actions-item:hover .quick-actions-item-icon {
+        background: rgba(115,182,85,0.18);
+        color: #0d2f50;
+    }
+
+    .quick-actions-item-label {
+        @apply leading-snug;
+    }
+
+    .quick-actions-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        background: transparent;
+        pointer-events: auto;
+    }
+
+    @keyframes quickActionsPing {
+        0% {
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+        70% {
+            transform: scale(1.18);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1.18);
+            opacity: 0;
+        }
+    }
+
     .stack-tile {
         @apply flex items-center gap-3 rounded-[20px] border px-4 py-3 transition duration-300;
         border-color: rgba(13, 47, 80, 0.10);
@@ -628,7 +745,7 @@
         @apply rounded-[26px] border border-white/70 bg-white/80 p-3 shadow-[0_18px_44px_rgba(13,47,80,0.08)] backdrop-blur-xl md:rounded-[30px] md:p-4;
     }
 
-    .quick-actions-grid {
+    .dashboard-quick-actions .quick-actions-grid {
         @apply grid gap-3 md:grid-cols-2 xl:grid-cols-4;
     }
 

@@ -14,6 +14,7 @@ class SiteSettingsService
     private ?array $websiteImagesCache = null;
     private ?array $storePaymentSettingsCache = null;
     private ?array $whmcsSettingsCache = null;
+    private ?array $systemHealthCache = null;
 
     public function getCompanyProfile(): array
     {
@@ -440,6 +441,41 @@ class SiteSettingsService
             ->all();
 
         return $marketing;
+    }
+
+    public function getSystemHealth(): array
+    {
+        if ($this->systemHealthCache !== null) {
+            return $this->systemHealthCache;
+        }
+
+        $defaults = [
+            'scheduler_last_ran_at' => null,
+            'queue_last_started_at' => null,
+            'queue_last_finished_at' => null,
+        ];
+
+        $stored = SiteSetting::query()
+            ->where('key', 'system_health')
+            ->first()?->value;
+
+        return $this->systemHealthCache = array_merge($defaults, is_array($stored) ? $stored : []);
+    }
+
+    public function putSystemHealth(array $health): void
+    {
+        $merged = array_merge($this->getSystemHealth(), $health);
+        $this->systemHealthCache = $merged;
+
+        SiteSetting::query()->updateOrCreate(
+            ['key' => 'system_health'],
+            [
+                'group' => 'system',
+                'value' => $merged,
+                'type' => 'json',
+                'is_public' => false,
+            ]
+        );
     }
 
     private function mergeNested(array $defaults, array $stored): array
