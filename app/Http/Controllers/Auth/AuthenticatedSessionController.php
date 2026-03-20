@@ -1,0 +1,161 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Enums\UserRole;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+class AuthenticatedSessionController extends Controller
+{
+    public function create()
+    {
+        return view('auth.login');
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        $throttleKey = Str::lower($request->string('email')).'|'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            throw ValidationException::withMessages([
+                'email' => 'Too many login attempts. Please try again in '.RateLimiter::availableIn($throttleKey).' seconds.',
+            ]);
+        }
+
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            RateLimiter::hit($throttleKey, 60);
+            throw ValidationException::withMessages([
+                'email' => 'Invalid credentials.',
+            ]);
+        }
+
+        RateLimiter::clear($throttleKey);
+
+        $user = $request->user();
+
+        if ($user->two_factor_enabled) {
+            Auth::logout();
+            $request->session()->put([
+                'auth.2fa.user_id' => $user->id,
+                'auth.2fa.remember' => $request->boolean('remember'),
+            ]);
+
+            app(TwoFactorChallengeController::class)->sendCode($user);
+
+            activity()
+                ->causedBy($user)
+                ->event('two_factor_requested')
+                ->withProperties(['ip' => $request->ip()])
+                ->log('Two-factor challenge started');
+
+            return redirect()->route('two-factor.create');
+        }
+
+        $request->session()->regenerate();
+        $user->forceFill(['last_login_at' => now()])->save();
+
+        activity()
+            ->causedBy($user)
+            ->event('login')
+            ->withProperties(['ip' => $request->ip()])
+            ->log('User logged in');
+
+        if ($user->hasRole('client')) {
+            return redirect()->route('client.dashboard');
+        }
+
+        if ($user->hasAnyRole(['hr', 'sales', 'support'])) {
+            return redirect()->route('employee.dashboard');
+        }
+
+        return redirect()->route('admin.dashboard');
+    }
+
+    public function quickLogin(Request $request, string $role): RedirectResponse
+    {
+        $this->ensureQuickLoginIsAllowed();
+
+        $userRole = UserRole::tryFrom($role);
+
+        if (! $userRole) {
+            throw new NotFoundHttpException();
+        }
+
+        $roleExists = Role::query()
+            ->where('name', $userRole->value)
+            ->where('guard_name', 'web')
+            ->exists();
+
+        if (! $roleExists) {
+            throw ValidationException::withMessages([
+                'email' => 'Quick login is unavailable because demo roles are not seeded on this environment.',
+            ]);
+        }
+
+        $user = User::query()
+            ->whereHas('roles', function ($query) use ($userRole) {
+                $query->where('name', $userRole->value)->where('guard_name', 'web');
+            })
+            ->orderBy('id')
+            ->first();
+
+        if (! $user) {
+            throw ValidationException::withMessages([
+                'email' => 'Quick login is unavailable because no demo user exists for this role.',
+            ]);
+        }
+
+        Auth::login($user, true);
+
+        $request->session()->regenerate();
+        $user->forceFill(['last_login_at' => now()])->save();
+
+        if ($user->hasRole(UserRole::Client->value)) {
+            return redirect()->route('client.dashboard');
+        }
+
+        if ($user->hasAnyRole([UserRole::HR->value, UserRole::Sales->value, UserRole::Support->value])) {
+            return redirect()->route('employee.dashboard');
+        }
+
+        return redirect()->route('admin.dashboard');
+    }
+
+    public function destroy(Request $request): RedirectResponse
+    {
+        activity()
+            ->causedBy($request->user())
+            ->event('logout')
+            ->withProperties(['ip' => $request->ip()])
+            ->log('User logged out');
+
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+    protected function ensureQuickLoginIsAllowed(): void
+    {
+        if (! config('platform.features.quick_login') || ! app()->environment('local')) {
+            throw new NotFoundHttpException();
+        }
+    }
+}

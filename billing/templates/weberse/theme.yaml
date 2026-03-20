@@ -1,0 +1,8 @@
+# Weberse Theme - Matches main website (Laravel) design
+name: "Weberse"
+description: "Weberse Infotech brand theme: dark header, green accents, matches main website."
+author: "Weberse Infotech"
+config:
+  parent: twenty-one
+  settings:
+    footer_copyright_notice: "© {year} {company}. All rights reserved."
