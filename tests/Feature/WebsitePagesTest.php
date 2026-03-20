@@ -34,15 +34,46 @@ class WebsitePagesTest extends TestCase
 
     public function test_seo_endpoints_are_available(): void
     {
-        $this->get('/robots.txt')
+        $robots = $this->get('/robots.txt');
+        $robots
             ->assertOk()
             ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
             ->assertSee('Sitemap:', false);
+        $this->assertStringContainsString('public', (string) $robots->headers->get('Cache-Control'));
+        $this->assertStringContainsString('max-age=300', (string) $robots->headers->get('Cache-Control'));
 
-        $this->get('/sitemap.xml')
+        $sitemap = $this->get('/sitemap.xml');
+        $sitemap
             ->assertOk()
             ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
             ->assertSee('<?xml version="1.0" encoding="UTF-8"?>', false)
             ->assertSee('<urlset', false);
+        $this->assertStringContainsString('public', (string) $sitemap->headers->get('Cache-Control'));
+        $this->assertStringContainsString('max-age=300', (string) $sitemap->headers->get('Cache-Control'));
+    }
+
+    public function test_legacy_marketing_urls_redirect_to_current_pages(): void
+    {
+        $this->get('/why-us')
+            ->assertRedirect('/about');
+
+        $this->get('/digital-marketing')
+            ->assertRedirect('/services/digital-marketing');
+
+        $this->get('/ecommerce-development')
+            ->assertRedirect('/services/web-development');
+    }
+
+    public function test_public_marketing_pages_send_public_cache_headers(): void
+    {
+        $home = $this->get('/');
+        $home->assertOk();
+        $this->assertStringContainsString('public', (string) $home->headers->get('Cache-Control'));
+        $this->assertStringContainsString('max-age=300', (string) $home->headers->get('Cache-Control'));
+
+        $about = $this->get('/about');
+        $about->assertOk();
+        $this->assertStringContainsString('public', (string) $about->headers->get('Cache-Control'));
+        $this->assertStringContainsString('max-age=300', (string) $about->headers->get('Cache-Control'));
     }
 }

@@ -4,20 +4,49 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @php
+        $seoImageMetadata = function (?string $imageUrl): array {
+            if (empty($imageUrl)) {
+                return ['width' => null, 'height' => null, 'type' => null];
+            }
+
+            $imagePath = parse_url($imageUrl, PHP_URL_PATH);
+            $publicBasePath = parse_url(rtrim(config('app.url'), '/'), PHP_URL_PATH) ?: '';
+
+            if ($publicBasePath !== '' && str_starts_with($imagePath ?? '', $publicBasePath)) {
+                $imagePath = substr((string) $imagePath, strlen($publicBasePath)) ?: '/';
+            }
+
+            $absolutePath = public_path(ltrim((string) $imagePath, '/'));
+
+            if (! is_file($absolutePath)) {
+                return ['width' => null, 'height' => null, 'type' => null];
+            }
+
+            $size = @getimagesize($absolutePath);
+
+            return [
+                'width' => $size[0] ?? null,
+                'height' => $size[1] ?? null,
+                'type' => $size['mime'] ?? null,
+            ];
+        };
+
         $seoTitle = $title ?? ($companyProfile['name'] ?? config('platform.company.name'));
         $seoDescription = $description ?? 'Weberse Infotech builds premium websites, software systems, automation workflows, and digital products.';
         $seoRobots = $robots ?? 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
         $canonicalUrl = $canonical ?? url()->current();
         $seoType = $seoType ?? 'website';
-        $defaultSeoImage = $mediaAssetUrl($companyProfile['dark_logo'] ?? null, 'assets/images/og-cover.svg');
+        $defaultSeoImage = $mediaAssetUrl(null, 'assets/legacy/hero-1.jpg');
         $seoImage = $seoImage ?? $defaultSeoImage;
-        $seoImageWidth = $seoImageWidth ?? 1200;
-        $seoImageHeight = $seoImageHeight ?? 630;
-        $seoImageType = $seoImageType ?? match (strtolower(pathinfo(parse_url($seoImage, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION))) {
+        $seoImageInfo = $seoImageMetadata($seoImage);
+        $seoImageWidth = $seoImageWidth ?? $seoImageInfo['width'] ?? 1200;
+        $seoImageHeight = $seoImageHeight ?? $seoImageInfo['height'] ?? 630;
+        $seoImageType = $seoImageType ?? $seoImageInfo['type'] ?? match (strtolower(pathinfo(parse_url($seoImage, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION))) {
             'png' => 'image/png',
             'jpg', 'jpeg' => 'image/jpeg',
             'webp' => 'image/webp',
-            default => 'image/svg+xml',
+            'svg' => 'image/svg+xml',
+            default => 'image/jpeg',
         };
         $seoPublishedTime = $publishedTime ?? null;
         $seoModifiedTime = $modifiedTime ?? null;
@@ -120,7 +149,9 @@
         }
     @endphp
     <title>{{ $seoTitle }}</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    @if (!empty($includeCsrfToken ?? false))
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+    @endif
     <meta name="description" content="{{ $seoDescription }}">
     <meta name="robots" content="{{ $seoRobots }}">
     <meta name="author" content="{{ $companyProfile['name'] ?? config('platform.company.name') }}">

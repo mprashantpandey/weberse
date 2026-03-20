@@ -2,7 +2,7 @@
     'title' => ($post->seo_title ?: $post->title).' | Weberse Blog',
     'description' => $post->seo_description ?: $post->excerpt,
     'seoType' => 'article',
-    'seoImage' => $post->cover_image ? $mediaAssetUrl($post->cover_image) : $mediaAssetUrl($websiteImages['blog']['post_fallback_cover'] ?? null, 'assets/images/blog-cover.svg'),
+    'seoImage' => $post->cover_image ? $mediaAssetUrl($post->cover_image) : $mediaAssetUrl($websiteImages['blog']['post_fallback_cover'] ?? null, 'assets/images/blog-og.jpg'),
     'publishedTime' => optional($post->published_at)->toAtomString(),
     'modifiedTime' => optional($post->updated_at)->toAtomString(),
 ])

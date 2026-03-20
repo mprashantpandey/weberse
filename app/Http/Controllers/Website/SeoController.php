@@ -42,22 +42,28 @@ class SeoController extends Controller
     {
         $features = $this->settings->getWebsiteFeatures();
         $marketing = $this->settings->getMarketingContent();
-        $now = now();
+        $homeLastmod = $this->latestOf([
+            BlogPost::query()->where('is_published', true)->max('updated_at'),
+            PortfolioProject::query()->where('is_published', true)->max('updated_at'),
+            CaseStudy::query()->where('is_published', true)->max('updated_at'),
+            JobOpening::query()->where('is_published', true)->max('updated_at'),
+            $this->viewModifiedAt('home'),
+        ]);
 
         $urls = collect([
-            $this->urlItem(route('website.home'), $now, 'daily', '1.0'),
-            $this->urlItem(route('website.about'), $now, 'monthly', '0.8'),
-            $this->urlItem(route('website.services'), $now, 'weekly', '0.9'),
-            $this->urlItem(route('website.contact'), $now, 'monthly', '0.8'),
-            $this->urlItem(route('website.privacy'), $now, 'yearly', '0.3'),
-            $this->urlItem(route('website.terms'), $now, 'yearly', '0.3'),
+            $this->urlItem(route('website.home'), $homeLastmod, 'daily', '1.0'),
+            $this->urlItem(route('website.about'), $this->viewModifiedAt('about'), 'monthly', '0.8'),
+            $this->urlItem(route('website.services'), $this->latestOf([$this->viewModifiedAt('services'), $this->marketingConfigModifiedAt()]), 'weekly', '0.9'),
+            $this->urlItem(route('website.contact'), $this->viewModifiedAt('contact'), 'monthly', '0.8'),
+            $this->urlItem(route('website.privacy'), $this->viewModifiedAt('privacy'), 'yearly', '0.3'),
+            $this->urlItem(route('website.terms'), $this->viewModifiedAt('terms'), 'yearly', '0.3'),
         ]);
 
         foreach (collect($marketing['services'] ?? []) as $service) {
             if (! empty($service['slug'])) {
                 $urls->push($this->urlItem(
                     route('website.services.show', $service['slug']),
-                    $now,
+                    $this->marketingConfigModifiedAt(),
                     'monthly',
                     '0.8'
                 ));
@@ -65,7 +71,12 @@ class SeoController extends Controller
         }
 
         if ($features['portfolio_enabled'] ?? false) {
-            $urls->push($this->urlItem(route('website.portfolio'), $now, 'weekly', '0.8'));
+            $urls->push($this->urlItem(
+                route('website.portfolio'),
+                $this->latestOf([PortfolioProject::query()->where('is_published', true)->max('updated_at'), $this->viewModifiedAt('portfolio')]),
+                'weekly',
+                '0.8'
+            ));
 
             PortfolioProject::query()
                 ->where('is_published', true)
@@ -81,7 +92,12 @@ class SeoController extends Controller
         }
 
         if ($features['case_studies_enabled'] ?? false) {
-            $urls->push($this->urlItem(route('website.case-studies.index'), $now, 'weekly', '0.8'));
+            $urls->push($this->urlItem(
+                route('website.case-studies.index'),
+                $this->latestOf([CaseStudy::query()->where('is_published', true)->max('updated_at'), $this->viewModifiedAt('case-studies')]),
+                'weekly',
+                '0.8'
+            ));
 
             CaseStudy::query()
                 ->where('is_published', true)
@@ -97,7 +113,12 @@ class SeoController extends Controller
         }
 
         if ($features['blog_enabled'] ?? false) {
-            $urls->push($this->urlItem(route('website.blog.index'), $now, 'weekly', '0.8'));
+            $urls->push($this->urlItem(
+                route('website.blog.index'),
+                $this->latestOf([BlogPost::query()->where('is_published', true)->max('published_at'), $this->viewModifiedAt('blog')]),
+                'weekly',
+                '0.8'
+            ));
 
             BlogPost::query()
                 ->where('is_published', true)
@@ -113,7 +134,12 @@ class SeoController extends Controller
         }
 
         if ($features['careers_enabled'] ?? false) {
-            $urls->push($this->urlItem(route('website.careers'), $now, 'weekly', '0.7'));
+            $urls->push($this->urlItem(
+                route('website.careers'),
+                $this->latestOf([JobOpening::query()->where('is_published', true)->max('published_at'), $this->viewModifiedAt('careers')]),
+                'weekly',
+                '0.7'
+            ));
 
             JobOpening::query()
                 ->where('is_published', true)
@@ -129,11 +155,11 @@ class SeoController extends Controller
         }
 
         if ($features['hosting_enabled'] ?? false) {
-            $urls->push($this->urlItem(route('website.hosting'), $now, 'weekly', '0.7'));
+            $urls->push($this->urlItem(route('website.hosting'), $this->viewModifiedAt('hosting'), 'weekly', '0.7'));
         }
 
         if ($features['pricing_enabled'] ?? false) {
-            $urls->push($this->urlItem(route('website.pricing'), $now, 'monthly', '0.6'));
+            $urls->push($this->urlItem(route('website.pricing'), $this->viewModifiedAt('pricing'), 'monthly', '0.6'));
         }
 
         return response()
@@ -149,5 +175,31 @@ class SeoController extends Controller
             'changefreq' => $changefreq,
             'priority' => $priority,
         ];
+    }
+
+    private function viewModifiedAt(string $page): ?Carbon
+    {
+        $path = resource_path("views/website/pages/{$page}.blade.php");
+
+        return is_file($path) ? Carbon::createFromTimestamp(filemtime($path)) : null;
+    }
+
+    private function marketingConfigModifiedAt(): ?Carbon
+    {
+        $path = config_path('marketing.php');
+
+        return is_file($path) ? Carbon::createFromTimestamp(filemtime($path)) : null;
+    }
+
+    /**
+     * @param  array<int, Carbon|string|null>  $values
+     */
+    private function latestOf(array $values): ?Carbon
+    {
+        return collect($values)
+            ->filter()
+            ->map(fn ($value) => $value instanceof Carbon ? $value : Carbon::parse($value))
+            ->sortDesc()
+            ->first();
     }
 }

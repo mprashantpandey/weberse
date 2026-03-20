@@ -15,26 +15,44 @@ use App\Services\Settings\SiteSettingsService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
-Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
-Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::middleware('public.cache')->group(function () {
+    Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+    Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 
-Route::get('/', [WebsiteController::class, 'home'])->name('website.home');
-Route::get('/about', [WebsiteController::class, 'about'])->name('website.about');
-Route::get('/services', [WebsiteController::class, 'services'])->name('website.services');
-Route::get('/services/{slug}', [WebsiteController::class, 'service'])->name('website.services.show');
-Route::get('/portfolio', [WebsiteController::class, 'portfolio'])->name('website.portfolio');
-Route::get('/portfolio/{slug}', [WebsiteController::class, 'project'])->name('website.portfolio.show');
-Route::get('/case-studies', [WebsiteController::class, 'caseStudies'])->name('website.case-studies.index');
-Route::get('/case-studies/{slug}', [WebsiteController::class, 'caseStudy'])->name('website.case-studies.show');
-Route::get('/blog', [WebsiteController::class, 'blog'])->name('website.blog.index');
-Route::get('/blog/{post:slug}', [WebsiteController::class, 'blogPost'])->name('website.blog.show');
-Route::get('/careers', [WebsiteController::class, 'careers'])->name('website.careers');
-Route::get('/careers/{jobOpening:slug}/apply', [WebsiteController::class, 'apply'])->name('website.careers.apply-page');
-Route::get('/hosting', [WebsiteController::class, 'hosting'])->name('website.hosting');
-Route::get('/contact', [WebsiteController::class, 'contact'])->name('website.contact');
-Route::get('/pricing', [WebsiteController::class, 'pricing'])->name('website.pricing');
-Route::get('/privacy-policy', [WebsiteController::class, 'privacy'])->name('website.privacy');
-Route::get('/terms', [WebsiteController::class, 'terms'])->name('website.terms');
+    foreach ([
+        '/why-us' => '/about',
+        '/digital-marketing' => '/services/digital-marketing',
+        '/web-development' => '/services/web-development',
+        '/mobile-app-development' => '/services/mobile-app-development',
+        '/ui-ux-design' => '/services/ui-ux-design',
+        '/ai-automation' => '/services/ai-automation',
+        '/whatsapp-cloud-automation' => '/services/whatsapp-cloud-automation',
+        '/email-marketing-automation' => '/services/email-marketing-automation',
+        '/startup-mvp-development' => '/services/startup-mvp-development',
+        '/custom-software-development' => '/services/custom-software-development',
+        '/ecommerce-development' => '/services/web-development',
+    ] as $from => $to) {
+        Route::permanentRedirect($from, $to);
+    }
+
+    Route::get('/', [WebsiteController::class, 'home'])->name('website.home');
+    Route::get('/about', [WebsiteController::class, 'about'])->name('website.about');
+    Route::get('/services', [WebsiteController::class, 'services'])->name('website.services');
+    Route::get('/services/{slug}', [WebsiteController::class, 'service'])->name('website.services.show');
+    Route::get('/portfolio', [WebsiteController::class, 'portfolio'])->name('website.portfolio');
+    Route::get('/portfolio/{slug}', [WebsiteController::class, 'project'])->name('website.portfolio.show');
+    Route::get('/case-studies', [WebsiteController::class, 'caseStudies'])->name('website.case-studies.index');
+    Route::get('/case-studies/{slug}', [WebsiteController::class, 'caseStudy'])->name('website.case-studies.show');
+    Route::get('/blog', [WebsiteController::class, 'blog'])->name('website.blog.index');
+    Route::get('/blog/{post:slug}', [WebsiteController::class, 'blogPost'])->name('website.blog.show');
+    Route::get('/careers', [WebsiteController::class, 'careers'])->name('website.careers');
+    Route::get('/careers/{jobOpening:slug}/apply', [WebsiteController::class, 'apply'])->name('website.careers.apply-page');
+    Route::get('/hosting', [WebsiteController::class, 'hosting'])->name('website.hosting');
+    Route::get('/contact', [WebsiteController::class, 'contact'])->name('website.contact');
+    Route::get('/pricing', [WebsiteController::class, 'pricing'])->name('website.pricing');
+    Route::get('/privacy-policy', [WebsiteController::class, 'privacy'])->name('website.privacy');
+    Route::get('/terms', [WebsiteController::class, 'terms'])->name('website.terms');
+});
 Route::post('/contact', [FormController::class, 'contact'])->name('website.contact.submit');
 Route::post('/newsletter/subscribe', [FormController::class, 'newsletter'])->name('website.newsletter.subscribe');
 Route::post('/careers/apply', [FormController::class, 'apply'])->name('website.careers.apply');

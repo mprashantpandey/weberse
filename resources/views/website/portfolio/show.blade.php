@@ -1,7 +1,7 @@
 @extends('layouts.website', [
     'title' => $project->title.' | Project Details',
     'description' => $project->summary,
-    'seoImage' => $project->featured_image ? $mediaAssetUrl($project->featured_image) : $mediaAssetUrl($websiteImages['portfolio']['hero_showcase'] ?? null, 'assets/images/project-dashboard.svg'),
+    'seoImage' => $project->featured_image ? $mediaAssetUrl($project->featured_image) : $mediaAssetUrl($websiteImages['portfolio']['hero_showcase'] ?? null, 'assets/images/portfolio-og.jpg'),
 ])
 
 @section('content')

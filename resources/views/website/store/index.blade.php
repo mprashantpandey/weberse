@@ -1,4 +1,4 @@
-@extends('layouts.website')
+@extends('layouts.website', ['includeCsrfToken' => true])
 
 @section('content')
     @php
@@ -376,4 +376,3 @@
     </script>
     <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 @endsection
-

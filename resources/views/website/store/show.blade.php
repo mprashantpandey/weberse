@@ -1,4 +1,4 @@
-@extends('layouts.website')
+@extends('layouts.website', ['includeCsrfToken' => true])
 
 @section('content')
     @php($user = auth()->user())
@@ -287,4 +287,3 @@
         })();
     </script>
 @endsection
-
