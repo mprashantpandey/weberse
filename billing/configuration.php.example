@@ -1,0 +1,20 @@
+<?php
+/**
+ * Copy to configuration.php and replace with your real WHMCS values.
+ * Do not commit configuration.php with production secrets.
+ */
+$license = 'DEMO-LICENSE-KEY-REPLACE-ME';
+$db_host = 'localhost';
+$db_port = '';
+$db_username = 'demo_user';
+$db_password = 'demo_password';
+$db_name = 'demo_database';
+$db_tls_ca = '';
+$db_tls_ca_path = '';
+$db_tls_cert = '';
+$db_tls_cipher = '';
+$db_tls_key = '';
+$db_tls_verify_cert = '';
+$cc_encryption_hash = 'DEMO_ENCRYPTION_HASH_GENERATE_ON_INSTALL';
+$templates_compiledir = 'templates_c';
+$mysql_charset = 'utf8';
